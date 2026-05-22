@@ -9,7 +9,7 @@
 **請將以下網址中的 `你的GitHub帳號` 替換為您的 GitHub 使用者名稱：**
 
 ```
-https://你的GitHub帳號.github.io/Desnity_experiment/density-experiment.html
+https://你的GitHub帳號.github.io/Density_experiment/density-experiment.html
 ```
 
 > 💡 **如何啟用 GitHub Pages？**
