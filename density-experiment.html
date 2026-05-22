@@ -1,0 +1,1435 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>密度實驗室</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#e8f5e9;--panel:#c8e6c9;--card:#ffffff;--border:#81c784;
+  --accent:#2e7d32;--green:#1b5e20;--yellow:#f57f17;--red:#c62828;
+  --text:#1b2e1b;--muted:#4a7a4a;--radius:14px;
+}
+body{font-family:'Segoe UI','Microsoft JhengHei',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;user-select:none;font-size:18px;}
+
+/* HEADER */
+header{background:linear-gradient(135deg,#2e7d32,#1b5e20);border-bottom:2px solid #388e3c;padding:14px 28px;display:flex;align-items:center;gap:14px;}
+header h1{font-size:1.9rem;font-weight:700;color:#fff;}
+header p{font-size:1rem;color:#a5d6a7;margin-top:4px;}
+
+/* PAGE NAV */
+.page-nav{display:flex;background:var(--panel);border-bottom:2px solid var(--border);padding:0 28px;}
+.page-tab{padding:16px 32px;background:none;border:none;border-bottom:3px solid transparent;color:var(--muted);font-size:1.1rem;font-weight:600;cursor:pointer;transition:all .2s;margin-bottom:-2px;}
+.page-tab:hover{color:var(--accent);}
+.page-tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+
+/* PAGES */
+.page{display:none;padding:22px 28px;}
+.page.active{display:block;}
+
+/* ── SOLID LAB LAYOUT ── */
+.solid-layout{display:grid;grid-template-columns:1fr;gap:24px;}
+
+/* LEFT COLUMN */
+.left-col{display:flex;flex-direction:column;gap:14px;}
+
+/* Metal selector */
+.metal-tabs{display:flex;gap:10px;margin-bottom:4px;}
+.metal-tab{padding:12px 28px;border-radius:10px;border:2px solid var(--border);background:var(--card);color:var(--muted);cursor:pointer;font-size:1.1rem;font-weight:600;transition:all .2s;display:flex;align-items:center;gap:8px;}
+.metal-tab:hover{border-color:var(--accent);color:var(--accent);}
+.metal-tab.active{border-color:var(--accent);background:rgba(46,125,50,0.12);color:var(--accent);}
+
+/* Experiment station */
+.station{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px 24px;position:relative;}
+.station-title{font-size:0.9rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:14px;}
+
+/* Shelf */
+.shelf{background:linear-gradient(180deg,#dcedc8,#c8e6c9);border:1px solid var(--border);border-radius:10px;padding:14px 24px 18px;}
+.shelf-label{font-size:0.85rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:12px;}
+.shelf-items{display:flex;gap:24px;align-items:flex-end;min-height:80px;}
+
+/* Metal block */
+.metal-block{
+  display:flex;flex-direction:column;align-items:center;gap:5px;
+  cursor:grab;transition:transform .15s,box-shadow .15s;
+  position:relative;
+}
+.metal-block:active{cursor:grabbing;}
+.metal-block.dragging{opacity:0.35;}
+.metal-3d{
+  border-radius:6px;display:flex;align-items:center;justify-content:center;
+  font-size:0.6rem;font-weight:700;color:#fff;
+  box-shadow:3px 3px 0 rgba(0,0,0,0.4),inset 0 1px 0 rgba(255,255,255,0.2);
+  transition:transform .15s,box-shadow .15s;
+  position:relative;
+}
+.metal-block:hover .metal-3d{transform:translateY(-3px);box-shadow:3px 6px 0 rgba(0,0,0,0.4),inset 0 1px 0 rgba(255,255,255,0.2);}
+.metal-block-label{font-size:0.9rem;color:var(--muted);}
+.metal-block.used .metal-3d{opacity:0.3;cursor:not-allowed;}
+.metal-block.used .metal-block-label{opacity:0.3;}
+
+/* Instruments row */
+.instruments{display:flex;gap:0;align-items:flex-end;justify-content:space-around;}
+
+/* Balance */
+.balance-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:0;}
+.balance-label{font-size:1rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;align-self:flex-start;font-weight:700;}
+.balance-body{width:100%;background:#f1f8e9;border:2px solid var(--border);border-radius:12px;padding:20px 18px;display:flex;flex-direction:column;align-items:center;gap:12px;position:relative;justify-content:center;}
+.balance-plate{
+  width:200px;height:18px;background:linear-gradient(180deg,#81c784,#66bb6a);
+  border-radius:5px;border:1px solid #4caf50;
+  display:flex;align-items:center;justify-content:center;
+  position:relative;transition:background .3s;
+}
+.balance-plate.highlight{background:linear-gradient(180deg,rgba(76,175,80,0.6),rgba(56,142,60,0.4));border-color:var(--accent);}
+.balance-stand{width:6px;height:44px;background:#4caf50;margin:0 auto;}
+.balance-base{width:150px;height:12px;background:#4caf50;border-radius:5px;}
+.balance-item-on-plate{position:absolute;top:-38px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;}
+
+/* Cylinder */
+.cylinder-wrap{display:flex;flex-direction:column;align-items:center;gap:0;}
+.cylinder-label{font-size:1rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;align-self:flex-start;font-weight:700;}
+.cylinder-body{
+  width:120px;height:220px;
+  background:rgba(200,230,201,0.2);
+  border:3px solid #81c784;
+  border-top:none;border-radius:0 0 14px 14px;
+  position:relative;overflow:hidden;cursor:default;
+}
+.cylinder-body.highlight{border-color:var(--accent);background:rgba(46,125,50,0.1);}
+.cylinder-water{
+  position:absolute;bottom:0;left:0;right:0;
+  background:linear-gradient(180deg,rgba(100,181,246,0.65),rgba(25,118,210,0.5));
+  transition:height .6s cubic-bezier(.34,1.56,.64,1);
+  border-top:2px solid rgba(33,150,243,0.9);
+}
+.cylinder-object{
+  position:absolute;bottom:4px;left:50%;transform:translateX(-50%);
+  border-radius:4px;display:flex;align-items:center;justify-content:center;
+  font-size:0.8rem;font-weight:700;color:#fff;
+  transition:opacity .3s;
+}
+.cylinder-scale{
+  position:absolute;right:6px;top:0;bottom:0;
+  display:flex;flex-direction:column;justify-content:space-between;
+  padding:4px 0;pointer-events:none;
+}
+.cylinder-scale span{font-size:0.7rem;color:#388e3c;line-height:1;font-weight:600;}
+.cylinder-top{width:134px;height:14px;background:rgba(129,199,132,0.3);border:3px solid #81c784;border-bottom:none;border-radius:5px 5px 0 0;margin:0 auto;}
+
+
+/* Drop zones */
+.drop-zone{transition:all .2s;}
+.drop-zone.drag-over{outline:3px dashed var(--accent);outline-offset:4px;border-radius:8px;background:rgba(46,125,50,0.07);}
+
+/* Ghost draggable */
+#dragGhost{
+  position:fixed;pointer-events:none;z-index:9999;
+  display:none;flex-direction:column;align-items:center;gap:4px;
+  transform:translate(-50%,-50%);
+}
+
+/* RIGHT COLUMN */
+.right-col{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start;}
+@media(max-width:900px){.right-col{grid-template-columns:1fr;}}
+
+/* Trend line controls */
+.trend-controls{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;}
+.trend-btn{
+  padding:10px 20px;border-radius:10px;
+  border:2px solid var(--border);
+  background:var(--card);color:var(--muted);
+  cursor:pointer;font-size:1rem;font-weight:600;
+  transition:all .2s;display:flex;align-items:center;gap:8px;
+}
+.trend-btn:hover{border-color:var(--accent);color:var(--accent);}
+.trend-btn.active{color:#1b5e20;font-weight:700;}
+.trend-btn-label{font-size:0.9rem;}
+
+/* Data table */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:22px;}
+.card-title{font-size:1rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:16px;}
+
+.data-table{width:100%;border-collapse:collapse;font-size:1.1rem;}
+.data-table thead th{background:var(--panel);color:var(--muted);padding:13px 14px;text-align:center;font-size:1rem;font-weight:700;letter-spacing:1px;border-bottom:1px solid var(--border);}
+.data-table thead th:first-child{text-align:left;}
+.data-table tbody tr{border-bottom:1px solid rgba(30,58,95,0.4);transition:background .15s;}
+.data-table tbody tr:hover{background:rgba(46,125,50,0.06);}
+.data-table tbody td{padding:13px 14px;text-align:center;vertical-align:middle;}
+.data-table tbody td:first-child{text-align:left;}
+
+.sp-dot{width:13px;height:13px;border-radius:50%;display:inline-block;margin-right:10px;}
+.sp-name{font-weight:600;font-size:1.05rem;}
+
+.d-input{
+  width:96px;padding:10px 10px;
+  background:#f9fbe7;border:2px solid var(--border);
+  border-radius:8px;color:var(--text);font-size:1.1rem;text-align:center;
+  outline:none;transition:border-color .2s;
+  -moz-appearance:textfield;
+}
+.d-input::-webkit-outer-spin-button,
+.d-input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
+.d-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(46,125,50,0.2);}
+.d-input.ok{border-color:#66bb6a;color:#2e7d32;font-weight:700;}
+
+.rho-cell{font-weight:700;color:#2e7d32;font-size:1.1rem;}
+.rho-empty{color:#aaa;font-size:0.95rem;}
+
+/* Stats */
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px;}
+.stat-box{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 20px;}
+.stat-lbl{font-size:0.85rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;}
+.stat-v{font-size:1.5rem;font-weight:700;color:var(--green);margin-top:6px;}
+
+/* Chart */
+.chart-wrap{position:relative;height:440px;}
+
+/* Step hint */
+.step-hint{
+  background:rgba(200,230,201,0.5);border:1px solid #a5d6a7;
+  border-radius:12px;padding:16px 22px;font-size:1.05rem;color:var(--muted);line-height:2.2;
+}
+.step-hint b{color:var(--accent);}
+.step-badge{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:var(--accent);color:#fff;font-size:0.85rem;font-weight:700;margin-right:6px;}
+
+/* Reset btn */
+.reset-btn{padding:9px 18px;border-radius:8px;border:1.5px solid rgba(248,113,113,0.35);background:none;color:var(--red);cursor:pointer;font-size:0.95rem;transition:all .2s;float:right;}
+.reset-btn:hover{background:rgba(248,113,113,0.1);}
+
+/* Reveal density btn */
+.reveal-btn{
+  padding:8px 16px;border-radius:8px;
+  border:2px solid #66bb6a;
+  background:rgba(102,187,106,0.15);
+  color:#2e7d32;cursor:pointer;
+  font-size:1rem;font-weight:700;
+  transition:all .2s;
+  white-space:nowrap;
+}
+.reveal-btn:hover{background:rgba(102,187,106,0.35);}
+
+/* ── LIQUID PAGE ── */
+.vol-btn{
+  width:40px;height:40px;border-radius:8px;
+  border:2px solid var(--border);background:var(--card);
+  color:var(--accent);font-size:1.4rem;font-weight:700;
+  cursor:pointer;transition:all .2s;line-height:1;
+}
+.vol-btn:hover{background:rgba(46,125,50,0.12);border-color:var(--accent);}
+.zero-btn{
+  padding:10px 20px;border-radius:10px;
+  border:2px solid #ef9a9a;
+  background:rgba(239,154,154,0.15);
+  color:#c62828;cursor:pointer;
+  font-size:1rem;font-weight:700;
+  transition:all .2s;width:100%;
+}
+.zero-btn:hover{background:rgba(239,154,154,0.35);}
+.zero-btn.zeroed{
+  border-color:#66bb6a;
+  background:rgba(102,187,106,0.15);
+  color:#2e7d32;
+}
+
+/* Toast */
+#toast{position:fixed;bottom:26px;right:26px;z-index:9999;background:#2e7d32;color:#fff;padding:12px 24px;border-radius:10px;font-weight:700;font-size:1rem;opacity:0;pointer-events:none;transform:translateY(10px);transition:opacity .3s,transform .3s;}
+#toast.show{opacity:1;transform:translateY(0);}
+
+/* Hint arrow */
+.hint-arrow{color:var(--muted);font-size:1.6rem;align-self:center;}
+
+/* Station row layout */
+.station-row{
+  display:flex;
+  align-items:flex-end;
+  justify-content:center;
+  gap:0;
+  flex-wrap:wrap;
+}
+.shelf-panel{
+  display:flex;flex-direction:column;
+  background:linear-gradient(180deg,#dcedc8,#c8e6c9);
+  border:1px solid var(--border);border-radius:12px;
+  padding:16px 20px 20px;
+  min-width:220px;
+}
+.instrument-panel{
+  display:flex;flex-direction:row;
+  align-items:flex-end;
+  gap:14px;
+}
+.instrument-visual{
+  display:flex;flex-direction:column;
+  align-items:center;
+}
+.instrument-readout{
+  display:flex;flex-direction:column;
+  justify-content:flex-end;
+  gap:10px;
+  padding-bottom:4px;
+}
+.readout-box{
+  background:#f9fbe7;border:2px solid var(--border);border-radius:10px;
+  padding:12px 20px;text-align:center;min-width:160px;
+  box-shadow:0 2px 8px rgba(0,0,0,0.08);
+}
+.readout-box .rval{
+  font-size:2.4rem;font-weight:800;
+  font-family:'Courier New',monospace;letter-spacing:2px;
+}
+.readout-box .runit{font-size:1rem;color:var(--muted);margin-top:3px;}
+.station-divider{
+  width:1px;background:var(--border);
+  align-self:stretch;margin:0 20px;
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div style="font-size:2rem;">🔬</div>
+  <div>
+    <h1>互動式密度實驗室</h1>
+    <p>拖曳待測物到天平與量筒 · 手動填入讀數 · 自動生成散點圖</p>
+  </div>
+</header>
+
+<nav class="page-nav">
+  <button class="page-tab active" onclick="switchPage('solid',this)">⚙️ 固體密度實驗</button>
+  <button class="page-tab" onclick="switchPage('liquid',this)">💧 液體密度實驗</button>
+</nav>
+
+<!-- ══════════════ SOLID PAGE ══════════════ -->
+<div id="page-solid" class="page active">
+  <div style="margin-bottom:16px;">
+    <div class="metal-tabs" id="metalTabs"></div>
+  </div>
+  <div class="solid-layout">
+    <!-- LEFT -->
+    <div class="left-col">
+
+      <div class="step-hint">
+        <span class="step-badge">1</span> 從貨架<b>拖曳</b>金屬塊到 <b>天平</b>，讀取 M 值並填入表格&nbsp;&nbsp;
+        <span class="step-badge">2</span> 將金屬塊拖曳到 <b>量筒</b>，觀察水位上升，讀取 V 值並填入表格&nbsp;&nbsp;
+        <span class="step-badge">3</span> 自行計算 D = M / V，再按「顯示 D」按鈕驗證
+      </div>
+
+              <!-- Station: shelf + instruments all in one row -->
+      <div class="station">
+        <div class="station-title">🧪 實驗台</div>
+        <div class="station-row">
+
+          <!-- Shelf -->
+          <div class="shelf-panel">
+            <div class="shelf-label">📦 待測物貨架<br><small style="font-size:0.8rem;font-weight:400;">點選或拖曳到儀器</small></div>
+            <div class="shelf-items" id="shelfItems"></div>
+          </div>
+
+          <div class="station-divider"></div>
+
+          <!-- Balance -->
+          <div class="instrument-panel">
+            <div class="instrument-visual">
+              <div class="balance-label">⚖️ 電子天平</div>
+              <div class="balance-body drop-zone" id="balanceZone">
+                <div id="balancePlate" class="balance-plate">
+                  <div id="balanceItemDisplay" class="balance-item-on-plate"></div>
+                </div>
+                <div class="balance-stand"></div>
+                <div class="balance-base"></div>
+              </div>
+            </div>
+            <div class="instrument-readout">
+              <div class="readout-box">
+                <div class="rval" id="balanceVal" style="color:var(--green);">0.00</div>
+                <div class="runit">公克 (g)</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="hint-arrow" style="padding:0 14px;align-self:center;font-size:1.6rem;">→</div>
+
+          <!-- Cylinder -->
+          <div class="instrument-panel">
+            <div class="instrument-visual">
+              <div class="cylinder-label">🧪 量筒</div>
+              <div class="cylinder-top"></div>
+              <div class="cylinder-body drop-zone" id="cylinderZone">
+                <div class="cylinder-water" id="cylinderWater" style="height:40%;"></div>
+                <div class="cylinder-object" id="cylinderObj" style="display:none;"></div>
+                <div class="cylinder-scale">
+                  <span>200</span><span>160</span><span>120</span><span>80</span><span>40</span><span>0</span>
+                </div>
+              </div>
+            </div>
+            <div class="instrument-readout">
+              <div class="readout-box">
+                <div class="rval" id="cylinderVal" style="color:var(--accent);">100</div>
+                <div class="runit">mL (cm³)</div>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /station-row -->
+
+        <!-- Active item indicator -->
+        <div id="activeItemBar" style="margin-top:14px;padding:12px 18px;background:var(--panel);border-radius:10px;font-size:1rem;color:var(--muted);display:none;">
+          <b id="activeItemName" style="color:var(--text);font-size:1.05rem;"></b>&nbsp;&nbsp;已放上儀器，請記錄讀數後填入右側表格&nbsp;&nbsp;
+          <button style="padding:7px 18px;border-radius:8px;border:1.5px solid var(--border);background:none;color:var(--muted);cursor:pointer;font-size:0.95rem;" onclick="clearInstruments()">↺ 取回</button>
+        </div>
+
+      </div><!-- /station -->
+    </div><!-- /left-col -->
+
+    <!-- RIGHT -->
+    <div class="right-col">
+      <div class="card">
+        <div class="card-title">
+          實驗紀錄表
+          <button class="reset-btn" onclick="resetSolid()">↺ 重置</button>
+        </div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>待測物</th>
+              <th>M (g)</th>
+              <th>V (cm³)</th>
+              <th>D (g/cm³)</th>
+            </tr>
+          </thead>
+          <tbody id="solidTableBody"></tbody>
+        </table>
+
+      </div>
+
+      <div class="card">
+        <div class="card-title">質量對體積的關係圖</div>
+        <div class="trend-controls" id="trendControls"></div>
+        <div class="chart-wrap">
+          <canvas id="solidChart"></canvas>
+        </div>
+        <div style="margin-top:10px;font-size:0.78rem;color:var(--muted);line-height:1.8;">
+          ▸ 按上方按鈕可加入各物質趨勢線，斜率 = D&nbsp;&nbsp;▸ 虛線為標準值
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ LIQUID PAGE ══════════════ -->
+<div id="page-liquid" class="page">
+
+  <div class="step-hint" style="margin-bottom:18px;">
+    <span class="step-badge">1</span> 選擇液體種類&nbsp;&nbsp;
+    <span class="step-badge">2</span> 將量筒放上天平，按 <b>歸零</b> 去皮&nbsp;&nbsp;
+    <span class="step-badge">3</span> 調整液體量，讀取天平顯示的液體 <b>M</b>（g）與量筒刻度 <b>V</b>（cm³）&nbsp;&nbsp;
+    <span class="step-badge">4</span> 手動填入紀錄表，散點圖自動更新
+  </div>
+
+  <!-- Liquid selector -->
+  <div style="margin-bottom:18px;">
+    <div class="metal-tabs" id="liquidTabs"></div>
+  </div>
+
+  <div class="solid-layout">
+    <!-- LEFT: experiment -->
+    <div class="left-col">
+      <div class="station">
+        <div class="station-title">🧪 液體密度實驗台</div>
+        <div class="station-row" style="align-items:flex-end;justify-content:center;gap:40px;">
+
+          <!-- Balance with cylinder on top -->
+          <div style="display:flex;flex-direction:row;align-items:flex-end;gap:20px;">
+            <div style="display:flex;flex-direction:column;align-items:center;">
+              <div style="font-size:1rem;font-weight:700;color:var(--muted);letter-spacing:1px;margin-bottom:10px;">⚖️ 電子天平 + 量筒</div>
+              <!-- Cylinder sitting on balance plate -->
+              <div style="display:flex;flex-direction:column;align-items:center;">
+                <!-- Volume control above cylinder -->
+                <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+                  <button class="vol-btn" onclick="changeLiqVol(-10)">－</button>
+                  <span id="liqVolLabel" style="font-size:1.1rem;font-weight:700;color:var(--accent);min-width:70px;text-align:center;">0 cm³</span>
+                  <button class="vol-btn" onclick="changeLiqVol(+10)">＋</button>
+                </div>
+                <!-- Cylinder visual on the plate -->
+                <div class="cylinder-top" style="width:90px;"></div>
+                <div id="liqCylinder" class="cylinder-body" style="width:80px;height:180px;border-color:#81c784;">
+                  <div id="liqWater" class="cylinder-water" style="height:0%;"></div>
+                  <div class="cylinder-scale">
+                    <span>200</span><span>160</span><span>120</span><span>80</span><span>40</span><span>0</span>
+                  </div>
+                </div>
+              </div>
+              <!-- Balance plate directly under cylinder -->
+              <div class="balance-plate" style="width:180px;" id="liqBalancePlate"></div>
+              <div class="balance-stand"></div>
+              <div class="balance-base"></div>
+            </div>
+            <!-- Readout panel -->
+            <div style="display:flex;flex-direction:column;gap:12px;padding-bottom:4px;">
+              <div class="readout-box">
+                <div style="font-size:0.82rem;color:var(--muted);margin-bottom:4px;font-weight:600;">天平讀數</div>
+                <div class="rval" id="liqBalanceVal" style="color:#2e7d32;">20.00</div>
+                <div class="runit">公克 (g)</div>
+              </div>
+              <button class="zero-btn" id="liqZeroBtn" onclick="liqZero()" title="按一次歸零，再按復原">⊘ 歸零 (去皮)</button>
+              <div id="liqZeroStatus" style="font-size:0.82rem;color:var(--muted);text-align:center;">⚠ 建議 V=0 時按歸零去皮</div>
+            </div>
+          </div>
+
+        </div><!-- /station-row -->
+      </div><!-- /station -->
+    </div><!-- /left-col -->
+
+    <!-- RIGHT -->
+    <div class="right-col">
+      <div class="card">
+        <div class="card-title">
+          實驗紀錄表
+          <button class="reset-btn" onclick="resetLiquid()">↺ 重置</button>
+        </div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>M (g)</th>
+              <th>V (cm³)</th>
+              <th>D (g/cm³)</th>
+            </tr>
+          </thead>
+          <tbody id="liqTableBody"></tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <div class="card-title">質量對體積的關係圖</div>
+        <div class="trend-controls" id="liqTrendControls"></div>
+        <div class="chart-wrap">
+          <canvas id="liquidChart"></canvas>
+        </div>
+        <div style="margin-top:10px;font-size:0.85rem;color:var(--muted);line-height:1.8;">
+          ▸ 按上方按鈕可加入趨勢線，斜率 = D&nbsp;&nbsp;▸ 虛線為標準值
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Ghost element for drag -->
+<div id="dragGhost">
+  <div id="ghostBlock" class="metal-3d"></div>
+  <div id="ghostLabel" style="font-size:0.6rem;color:var(--muted);"></div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════
+//  DATA CONFIG
+// ═══════════════════════════════════════════
+const METALS = {
+  al:{ name:'鋁', icon:'🔘', ref:2.70,  color:'#c0c8d8', colorDark:'#8090a8',
+    specimens:[
+      {id:'al1', label:'鋁塊 A', mass:27.0,  vol:10.0},
+      {id:'al2', label:'鋁塊 B', mass:54.0,  vol:20.0},
+      {id:'al3', label:'鋁塊 C', mass:81.0,  vol:30.0},
+      {id:'al4', label:'鋁塊 D', mass:135.0, vol:50.0},
+      {id:'al5', label:'鋁塊 E', mass:270.0, vol:100.0},
+    ]
+  },
+  fe:{ name:'鐵', icon:'⚙️', ref:7.87, color:'#6b7280', colorDark:'#374151',
+    specimens:[
+      {id:'fe1', label:'鐵塊 A', mass:78.7,  vol:10.0},
+      {id:'fe2', label:'鐵塊 B', mass:157.4, vol:20.0},
+      {id:'fe3', label:'鐵塊 C', mass:236.1, vol:30.0},
+      {id:'fe4', label:'鐵塊 D', mass:393.5, vol:50.0},
+      {id:'fe5', label:'鐵塊 E', mass:787.0, vol:100.0},
+    ]
+  },
+  au:{ name:'金', icon:'🏅', ref:19.30, color:'#f59e0b', colorDark:'#b45309',
+    specimens:[
+      {id:'au1', label:'金塊 A', mass:96.5,  vol:5.0},
+      {id:'au2', label:'金塊 B', mass:193.0, vol:10.0},
+      {id:'au3', label:'金塊 C', mass:289.5, vol:15.0},
+      {id:'au4', label:'金塊 D', mass:482.5, vol:25.0},
+      {id:'au5', label:'金塊 E', mass:965.0, vol:50.0},
+    ]
+  },
+};
+
+const LIQUIDS = [
+  { id:'water', name:'水',     icon:'💧', ref:1.000, color:'#38bdf8', colorDark:'#0284c7',
+    liquidColor:'rgba(56,189,248,0.4)',
+    specimens:[
+      {mass:25.0,  vol:25},
+      {mass:50.0,  vol:50},
+      {mass:75.0,  vol:75},
+      {mass:100.0, vol:100},
+      {mass:150.0, vol:150},
+    ]
+  },
+  { id:'oil',   name:'食用油', icon:'🫙', ref:0.60,  color:'#fbbf24', colorDark:'#d97706',
+    liquidColor:'rgba(251,191,36,0.4)',
+    specimens:[
+      {mass:15.0,  vol:25},
+      {mass:30.0,  vol:50},
+      {mass:45.0,  vol:75},
+      {mass:60.0,  vol:100},
+      {mass:90.0,  vol:150},
+    ]
+  },
+];
+
+// ═══════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════
+let currentMetal = 'al';
+
+// solidEntries[metalId][specimenIdx] = {m:'', v:''}
+const solidEntries = {};
+  Object.keys(METALS).forEach(k=>{
+  solidEntries[k] = METALS[k].specimens.map(()=>({m:'',v:'',revealed:false}));
+});
+const usedSpecimens = {}; // usedSpecimens[metalId] = Set of idx
+Object.keys(METALS).forEach(k=>{ usedSpecimens[k] = new Set(); });
+
+// liquidEntries[liqId][idx] = {m:'', v:''}
+const liquidEntries = {};
+LIQUIDS.forEach(l=>{ liquidEntries[l.id] = l.specimens.map(()=>({m:'',v:''})); });
+
+// Drag state
+let dragSpecIdx = null;
+let dragMetal   = null;
+
+// Instrument state
+let balanceMass   = null;
+let cylinderVol   = null;
+let onBalanceIdx  = null;
+let onCylIdx      = null;
+
+// Trend line toggle state per metal
+const trendVisible = { al:false, fe:false, au:false };
+
+let solidChartInst  = null;
+let liquidChartInst = null;
+
+// ═══════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════
+function init(){
+  buildMetalTabs();
+  buildShelf();
+  renderSolidTable();
+  buildTrendControls();
+  renderSolidChart();
+  buildLiquidPage();
+  renderLiquidChart();
+  setupDropZones();
+  // Init liquid instruments after DOM ready
+  setTimeout(renderLiquidInstruments, 100);
+}
+
+// ═══════════════════════════════════════════
+//  PAGE SWITCH
+// ═══════════════════════════════════════════
+function switchPage(name, btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.page-tab').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  btn.classList.add('active');
+  setTimeout(()=>{
+    if(name==='solid') renderSolidChart();
+    if(name==='liquid'){
+      buildLiquidPage();
+      renderLiquidChart();
+    }
+  },60);
+}
+
+// ═══════════════════════════════════════════
+//  METAL TABS
+// ═══════════════════════════════════════════
+function buildMetalTabs(){
+  const wrap = document.getElementById('metalTabs');
+  wrap.innerHTML = '';
+  Object.keys(METALS).forEach(k=>{
+    const m = METALS[k];
+    const btn = document.createElement('button');
+    btn.className = 'metal-tab'+(k===currentMetal?' active':'');
+    btn.id = 'mtab-'+k;
+    btn.innerHTML = `${m.icon} ${m.name}`;
+    btn.onclick = ()=>selectMetal(k);
+    wrap.appendChild(btn);
+  });
+}
+
+function selectMetal(k){
+  currentMetal = k;
+  document.querySelectorAll('.metal-tab').forEach(b=>b.classList.remove('active'));
+  document.getElementById('mtab-'+k).classList.add('active');
+  clearInstruments();
+  buildShelf();
+  renderSolidTable();
+  buildTrendControls();
+  renderSolidChart();
+}
+
+// ═══════════════════════════════════════════
+//  SHELF
+// ═══════════════════════════════════════════
+function buildShelf(){
+  const wrap = document.getElementById('shelfItems');
+  wrap.innerHTML = '';
+  const mat = METALS[currentMetal];
+  const sizes = [28,34,40,50,60]; // visual sizes
+
+  mat.specimens.forEach((sp,i)=>{
+    const used = usedSpecimens[currentMetal].has(i);
+    const div = document.createElement('div');
+    div.className = 'metal-block'+(used?' used':'');
+    div.id = 'block-'+i;
+    div.draggable = !used;
+
+    const sz = sizes[i];
+    div.innerHTML = `
+      <div class="metal-3d" style="width:${sz}px;height:${sz}px;background:linear-gradient(135deg,${mat.color},${mat.colorDark});">
+        ${mat.icon}
+      </div>
+      <div class="metal-block-label">${sp.label}</div>
+    `;
+
+    if(!used){
+      div.addEventListener('mousedown', e=>startDrag(e, i, sz));
+      div.addEventListener('click', ()=>quickSelect(i));
+    }
+    wrap.appendChild(div);
+  });
+}
+
+// ═══════════════════════════════════════════
+//  DRAG & DROP (mouse-based)
+// ═══════════════════════════════════════════
+let ghostActive = false;
+
+function startDrag(e, idx, sz){
+  e.preventDefault();
+  dragSpecIdx = idx;
+  dragMetal   = currentMetal;
+
+  const mat = METALS[currentMetal];
+  const sp  = mat.specimens[idx];
+
+  // Show ghost
+  const ghost = document.getElementById('dragGhost');
+  const gBlock = document.getElementById('ghostBlock');
+  const gLabel = document.getElementById('ghostLabel');
+  gBlock.style.width  = sz+'px';
+  gBlock.style.height = sz+'px';
+  gBlock.style.background = `linear-gradient(135deg,${mat.color},${mat.colorDark})`;
+  gBlock.textContent = mat.icon;
+  gBlock.style.fontSize = '1rem';
+  gLabel.textContent = sp.label;
+  ghost.style.display = 'flex';
+  ghostActive = true;
+
+  moveGhost(e);
+
+  document.addEventListener('mousemove', onDragMove);
+  document.addEventListener('mouseup',   onDragEnd);
+}
+
+function moveGhost(e){
+  const ghost = document.getElementById('dragGhost');
+  ghost.style.left = e.clientX+'px';
+  ghost.style.top  = e.clientY+'px';
+}
+
+function onDragMove(e){
+  if(!ghostActive) return;
+  moveGhost(e);
+
+  // Highlight drop zones
+  const bZone = document.getElementById('balanceZone');
+  const cZone = document.getElementById('cylinderZone');
+  const br = bZone.getBoundingClientRect();
+  const cr = cZone.getBoundingClientRect();
+
+  bZone.classList.toggle('drag-over', inRect(e,br));
+  document.getElementById('balancePlate').classList.toggle('highlight', inRect(e,br));
+  cZone.classList.toggle('drag-over', inRect(e,cr));
+}
+
+function onDragEnd(e){
+  document.removeEventListener('mousemove', onDragMove);
+  document.removeEventListener('mouseup',   onDragEnd);
+  ghostActive = false;
+  document.getElementById('dragGhost').style.display = 'none';
+
+  const bZone = document.getElementById('balanceZone');
+  const cZone = document.getElementById('cylinderZone');
+  const br = bZone.getBoundingClientRect();
+  const cr = cZone.getBoundingClientRect();
+
+  bZone.classList.remove('drag-over');
+  document.getElementById('balancePlate').classList.remove('highlight');
+  cZone.classList.remove('drag-over');
+
+  if(inRect(e,br)) dropOnBalance(dragSpecIdx);
+  else if(inRect(e,cr)) dropOnCylinder(dragSpecIdx);
+
+  dragSpecIdx = null;
+  dragMetal   = null;
+}
+
+function inRect(e, r){
+  return e.clientX>=r.left && e.clientX<=r.right && e.clientY>=r.top && e.clientY<=r.bottom;
+}
+
+// Quick click to cycle through instruments
+function quickSelect(idx){
+  if(usedSpecimens[currentMetal].has(idx)) return;
+  if(onBalanceIdx === null){
+    dropOnBalance(idx);
+  } else if(onCylIdx === null){
+    dropOnCylinder(idx);
+  }
+}
+
+// ═══════════════════════════════════════════
+//  DROP ON BALANCE
+// ═══════════════════════════════════════════
+function dropOnBalance(idx){
+  if(usedSpecimens[currentMetal].has(idx)) return;
+
+  const mat = METALS[currentMetal];
+  const sp  = mat.specimens[idx];
+
+  onBalanceIdx = idx;
+  balanceMass  = sp.mass;
+
+  // Update balance display
+  animateNumber('balanceVal', 0, sp.mass, 800, 2);
+
+  // Show item on plate
+  const plate = document.getElementById('balanceItemDisplay');
+  plate.innerHTML = `
+    <div class="metal-3d" style="width:28px;height:28px;background:linear-gradient(135deg,${mat.color},${mat.colorDark});font-size:0.7rem;">
+      ${mat.icon}
+    </div>`;
+
+  showActiveBar();
+  showToast(`${sp.label} 放上天平，請記錄讀數`);
+}
+
+// ═══════════════════════════════════════════
+//  DROP ON CYLINDER
+// ═══════════════════════════════════════════
+const WATER_BASE = 100; // mL baseline
+
+function dropOnCylinder(idx){
+  if(usedSpecimens[currentMetal].has(idx)) return;
+
+  const mat = METALS[currentMetal];
+  const sp  = mat.specimens[idx];
+
+  // If nothing on balance yet, put on balance first
+  if(onBalanceIdx === null){ dropOnBalance(idx); return; }
+  // If different specimen already being measured
+  if(onBalanceIdx !== idx){ showToast('請先取回天平上的物體'); return; }
+
+  onCylIdx   = idx;
+  cylinderVol = sp.vol;
+
+  const totalVol = WATER_BASE + sp.vol;
+  const maxVol   = 200;
+  const pct      = (totalVol / maxVol) * 100;
+
+  // Animate water rise
+  const water = document.getElementById('cylinderWater');
+  const prevH = parseFloat(water.style.height||'50');
+  water.style.height = pct+'%';
+
+  // Show object inside cylinder
+  const obj = document.getElementById('cylinderObj');
+  const sz  = Math.max(14, Math.min(30, 10 + sp.vol/4));
+  obj.style.display = 'flex';
+  obj.style.width   = sz+'px';
+  obj.style.height  = sz+'px';
+  obj.style.background = mat.color;
+  obj.textContent = mat.icon;
+  obj.style.fontSize = (sz*0.5)+'px';
+
+  animateNumber('cylinderVal', WATER_BASE, totalVol, 700, 1);
+
+  showActiveBar();
+  showToast(`放入量筒，水位上升，請記錄體積讀數`);
+}
+
+// ═══════════════════════════════════════════
+//  ACTIVE BAR
+// ═══════════════════════════════════════════
+function showActiveBar(){
+  const bar = document.getElementById('activeItemBar');
+  const mat = METALS[currentMetal];
+  if(onBalanceIdx === null){ bar.style.display='none'; return; }
+  const sp = mat.specimens[onBalanceIdx];
+  bar.style.display = 'flex';
+  bar.style.alignItems = 'center';
+  bar.style.gap = '10px';
+  document.getElementById('activeItemName').textContent = sp.label;
+}
+
+// ═══════════════════════════════════════════
+//  RECORD CURRENT MEASUREMENT
+// ═══════════════════════════════════════════
+function recordCurrent(){
+  // 自動填入功能已移除，使用者自行手動填寫
+}
+
+function clearInstruments(keepUsed=false){
+  onBalanceIdx = null;
+  onCylIdx     = null;
+  balanceMass  = null;
+  cylinderVol  = null;
+
+  document.getElementById('balanceVal').textContent = '0.00';
+  document.getElementById('balanceItemDisplay').innerHTML = '';
+  document.getElementById('cylinderVal').textContent = String(WATER_BASE);
+  document.getElementById('cylinderWater').style.height = (WATER_BASE/200*100)+'%';
+  document.getElementById('cylinderObj').style.display = 'none';
+  document.getElementById('activeItemBar').style.display = 'none';
+}
+
+// ═══════════════════════════════════════════
+//  SOLID TABLE
+// ═══════════════════════════════════════════
+function renderSolidTable(){
+  const mat  = METALS[currentMetal];
+  const data = solidEntries[currentMetal];
+  const tbody= document.getElementById('solidTableBody');
+
+  tbody.innerHTML = mat.specimens.map((sp,i)=>{
+    const d = data[i];
+    const hasData = d.m!=='' && d.v!=='' && +d.v>0;
+    const rho = hasData ? (+d.m/+d.v).toFixed(4) : null;
+    const revealed = d.revealed || false;
+    const mOk = d.m!=='' ? 'ok' : '';
+    const vOk = d.v!=='' ? 'ok' : '';
+    return `<tr>
+      <td>
+        <span class="sp-dot" style="background:${mat.color};"></span>
+        <span class="sp-name">${sp.label}</span>
+      </td>
+      <td>
+        <input class="d-input ${mOk}" type="text" inputmode="decimal"
+          placeholder="—" value="${d.m}"
+          onchange="onSolidInput(${i},'m',this)">
+      </td>
+      <td>
+        <input class="d-input ${vOk}" type="text" inputmode="decimal"
+          placeholder="—" value="${d.v}"
+          onchange="onSolidInput(${i},'v',this)">
+      </td>
+      <td>
+        ${hasData && revealed
+          ? `<span class="rho-cell">${rho}</span>`
+          : hasData && !revealed
+            ? `<button class="reveal-btn" onclick="revealDensity(${i})">顯示 D</button>`
+            : `<span class="rho-empty">—</span>`
+        }
+      </td>
+    </tr>`;
+  }).join('');
+
+  renderSolidStats();
+  // 不顯示標準密度值
+}
+
+function onSolidInput(idx, field, el){
+  const val = el.value.trim();
+  // 允許小數，驗證是否為合法正數
+  const num = parseFloat(val);
+  if(val!=='' && (isNaN(num) || num<0)){
+    el.style.borderColor='var(--red)';
+    return;
+  }
+  solidEntries[currentMetal][idx][field] = val;
+  solidEntries[currentMetal][idx].revealed = false;
+  el.classList.toggle('ok', val!=='');
+  el.style.borderColor='';
+  renderSolidTable();
+  renderSolidChart();
+}
+
+function revealDensity(idx){
+  solidEntries[currentMetal][idx].revealed = true;
+  renderSolidTable();
+}
+
+function renderSolidStats(){
+  // 統計欄位已移除
+}
+
+function resetSolid(){
+  if(!confirm('確定清除目前金屬的所有紀錄？')) return;
+  solidEntries[currentMetal] = METALS[currentMetal].specimens.map(()=>({m:'',v:'',revealed:false}));
+  usedSpecimens[currentMetal] = new Set();
+  clearInstruments();
+  buildShelf();
+  renderSolidTable();
+  renderSolidChart();
+}
+
+// ═══════════════════════════════════════════
+//  TREND CONTROLS
+// ═══════════════════════════════════════════
+function buildTrendControls(){
+  const wrap = document.getElementById('trendControls');
+  wrap.innerHTML = '';
+  Object.keys(METALS).forEach(k=>{
+    const mat = METALS[k];
+    const btn = document.createElement('button');
+    const isOn = trendVisible[k];
+    btn.className = 'trend-btn' + (isOn ? ' active' : '');
+    btn.id = 'trendbtn-'+k;
+    btn.style.borderColor = isOn ? mat.color : '';
+    btn.style.backgroundColor = isOn ? mat.color+'33' : '';
+    btn.style.color = isOn ? mat.color : '';
+    btn.innerHTML = `<span style="width:12px;height:12px;border-radius:50%;background:${mat.color};display:inline-block;"></span>
+      ${mat.name} 趨勢線`;
+    btn.onclick = ()=>toggleTrend(k);
+    wrap.appendChild(btn);
+  });
+}
+
+function toggleTrend(k){
+  trendVisible[k] = !trendVisible[k];
+  buildTrendControls();
+  renderSolidChart();
+}
+
+// ═══════════════════════════════════════════
+//  SOLID CHART
+// ═══════════════════════════════════════════
+const SOLID_COLORS = ['#4f8ef7','#34d399','#f59e0b'];
+
+function renderSolidChart(){
+  const ctx = document.getElementById('solidChart').getContext('2d');
+  if(solidChartInst) solidChartInst.destroy();
+
+  const datasets = [];
+  const metalKeys = Object.keys(METALS);
+
+  metalKeys.forEach((k,ki)=>{
+    const mat = METALS[k];
+    const pts = solidEntries[k]
+      .map((d,i)=>{ if(d.m===''||d.v===''||+d.v<=0) return null; return {x:+d.v,y:+d.m,sp:mat.specimens[i].label}; })
+      .filter(Boolean);
+    if(pts.length===0) return;
+
+    const col = mat.color;
+
+    // Points
+    datasets.push({
+      label: mat.icon+' '+mat.name+'（量測）',
+      data: pts.map(p=>({x:p.x,y:p.y})),
+      type:'scatter',
+      backgroundColor: col+'cc',
+      borderColor: col,
+      pointRadius:10, pointHoverRadius:13,
+      order:2,
+    });
+
+    const rhos = pts.map(p=>p.y/p.x);
+    const slope = rhos.reduce((a,b)=>a+b,0)/rhos.length;
+    const maxV  = Math.max(...pts.map(p=>p.x))*1.2;
+
+    // Trend line — only if toggled on
+    if(trendVisible[k]){
+      datasets.push({
+        label: mat.name+' 趨勢線 D≈'+slope.toFixed(3)+' g/cm³',
+        data:[{x:0,y:0},{x:maxV,y:slope*maxV}],
+        type:'line', borderColor:col, borderWidth:2.5,
+        pointRadius:0, fill:false, order:1,
+      });
+      // Std reference dashed
+      datasets.push({
+        label: mat.name+' 標準值 D='+mat.ref,
+        data:[{x:0,y:0},{x:maxV,y:mat.ref*maxV}],
+        type:'line', borderColor:col+'55', borderWidth:1.5,
+        borderDash:[3,6], pointRadius:0, fill:false, order:1,
+      });
+    }
+  });
+
+  const noData = datasets.length===0;
+
+  solidChartInst = new Chart(ctx,{
+    type:'scatter',
+    data:{ datasets: noData?[]:datasets },
+    plugins: noData ? [emptyTextPlugin('請操作左側儀器並填入數據')] : [],
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{
+        legend:{
+          display:!noData,
+          labels:{color:'#1b2e1b',boxWidth:16,font:{size:15,weight:'600'},
+            filter:item=>!item.text.includes('標準值')
+          }
+        },
+        tooltip:{callbacks:{label:c=>{
+          if(c.raw&&c.raw.x!==undefined){
+            const r=(c.raw.y/c.raw.x).toFixed(4);
+            return `V=${c.raw.x} cm³, M=${c.raw.y} g → D=${r} g/cm³`;
+          }
+          return c.dataset.label;
+        }},bodyFont:{size:14},titleFont:{size:14}}
+      },
+      scales:{
+        x:{title:{display:true,text:'體積 V (cm³)',color:'#2e7d32',font:{size:15,weight:'600'}},ticks:{color:'#2e7d32',font:{size:14}},grid:{color:'rgba(165,214,167,0.5)'},beginAtZero:true},
+        y:{title:{display:true,text:'質量 M (g)',color:'#2e7d32',font:{size:15,weight:'600'}},ticks:{color:'#2e7d32',font:{size:14}},grid:{color:'rgba(165,214,167,0.5)'},beginAtZero:true},
+      }
+    }
+  });
+}
+
+// ═══════════════════════════════════════════
+//  LIQUID PAGE STATE
+// ═══════════════════════════════════════════
+let currentLiquid = 'water';
+let liqVol = 0;         // cm³ currently in cylinder
+let liqZeroed = false;  // has tare been pressed?
+let liqTareOffset = 0;  // mass of empty cylinder (virtual)
+const LIQ_CYL_MASS = 20; // virtual cylinder tare mass (g)
+const LIQ_MAX_VOL = 200;
+
+// liquidEntries2[liqId][idx] = {m:'', v:'', revealed:false}
+const liquidEntries2 = {};
+LIQUIDS.forEach(l=>{ liquidEntries2[l.id] = Array.from({length:5},()=>({m:'',v:'',revealed:false})); });
+const liqTrendVisible = { water:false, oil:false };
+
+function buildLiquidPage(){
+  buildLiquidTabs();
+  renderLiquidInstruments();
+  renderLiquidTable();
+  buildLiqTrendControls();
+}
+
+function buildLiquidTabs(){
+  const wrap = document.getElementById('liquidTabs');
+  if(!wrap) return;
+  wrap.innerHTML = '';
+  LIQUIDS.forEach(liq=>{
+    const btn = document.createElement('button');
+    btn.className = 'metal-tab'+(liq.id===currentLiquid?' active':'');
+    btn.innerHTML = `${liq.icon} ${liq.name}`;
+    btn.onclick = ()=>selectLiquid(liq.id);
+    wrap.appendChild(btn);
+  });
+}
+
+function selectLiquid(id){
+  currentLiquid = id;
+  liqZeroed = false;
+  liqVol = 0;
+  liqTareOffset = 0;
+  buildLiquidTabs();
+  renderLiquidInstruments();
+  renderLiquidTable();
+  buildLiqTrendControls();
+  renderLiquidChart();
+}
+
+function changeLiqVol(delta){
+  liqVol = Math.max(0, Math.min(LIQ_MAX_VOL, liqVol + delta));
+  renderLiquidInstruments();
+}
+
+function liqZero(){
+  if(liqZeroed){
+    // 再按一次 → 復原
+    liqZeroed = false;
+    liqTareOffset = 0;
+    renderLiquidInstruments();
+    showToast('↩ 已復原，天平顯示總質量（含量筒）');
+  } else {
+    // 第一次按 → 歸零去皮
+    const liq = LIQUIDS.find(l=>l.id===currentLiquid);
+    const liquidMassNow = liqVol * liq.ref;
+    liqTareOffset = LIQ_CYL_MASS + liquidMassNow;
+    liqZeroed = true;
+    renderLiquidInstruments();
+    showToast('⊘ 已歸零（去皮）！現在顯示液體淨重');
+  }
+}
+
+function renderLiquidInstruments(){
+  const liq = LIQUIDS.find(l=>l.id===currentLiquid);
+  if(!liq) return;
+
+  // Update volume label
+  const volLabel = document.getElementById('liqVolLabel');
+  if(volLabel) volLabel.textContent = liqVol + ' cm³';
+
+  // Update main cylinder fill (pct of 200)
+  const cylPct = (liqVol / LIQ_MAX_VOL) * 100;
+  const liqWater = document.getElementById('liqWater');
+  if(liqWater){
+    liqWater.style.height = cylPct + '%';
+    liqWater.style.background = liq.id==='oil'
+      ? 'linear-gradient(180deg,rgba(251,191,36,0.7),rgba(245,158,11,0.5))'
+      : 'linear-gradient(180deg,rgba(100,181,246,0.65),rgba(25,118,210,0.5))';
+    liqWater.style.borderTop = '2px solid '+(liq.id==='oil'?'rgba(245,158,11,0.9)':'rgba(33,150,243,0.9)');
+  }
+
+  // Update mini cylinder on balance
+  const miniWater = document.getElementById('liqMiniWater');
+  if(miniWater){
+    miniWater.style.height = cylPct + '%';
+    miniWater.style.background = liq.id==='oil'
+      ? 'linear-gradient(180deg,rgba(251,191,36,0.7),rgba(245,158,11,0.5))'
+      : 'linear-gradient(180deg,rgba(100,181,246,0.65),rgba(25,118,210,0.5))';
+  }
+
+  // Compute balance reading
+  const liquidMass = liqVol * liq.ref; // true liquid mass
+  const totalMass  = LIQ_CYL_MASS + liquidMass;
+  const displayed  = liqZeroed ? (totalMass - liqTareOffset) : totalMass;
+
+  animateNumber('liqBalanceVal', parseFloat(document.getElementById('liqBalanceVal')?.textContent||'0'), displayed, 500, 2);
+
+  // Zero button state
+  const zeroBtn = document.getElementById('liqZeroBtn');
+  const zeroStatus = document.getElementById('liqZeroStatus');
+  if(zeroBtn){
+    if(liqZeroed){
+      zeroBtn.classList.add('zeroed');
+      zeroBtn.textContent = '✓ 已歸零';
+    } else {
+      zeroBtn.classList.remove('zeroed');
+      zeroBtn.textContent = '⊘ 歸零 (去皮)';
+    }
+  }
+  if(zeroStatus){
+    zeroStatus.textContent = liqZeroed ? '✓ 已去皮，顯示液體淨重' : '⚠ 建議 V=0 時按歸零去皮';
+    zeroStatus.style.color = liqZeroed ? '#2e7d32' : '#f57f17';
+  }
+}
+
+function renderLiquidTable(){
+  const liq = LIQUIDS.find(l=>l.id===currentLiquid);
+  if(!liq) return;
+  const data = liquidEntries2[currentLiquid];
+  const tbody = document.getElementById('liqTableBody');
+  if(!tbody) return;
+
+  tbody.innerHTML = data.map((d,i)=>{
+    const hasData = d.m!=='' && d.v!=='' && +d.v>0;
+    const rho = hasData ? (+d.m/+d.v).toFixed(4) : null;
+    const revealed = d.revealed || false;
+    const mOk = d.m!=='' ? 'ok' : '';
+    const vOk = d.v!=='' ? 'ok' : '';
+    return `<tr>
+      <td style="color:var(--muted);font-weight:600;">${i+1}</td>
+      <td><input class="d-input ${mOk}" type="text" inputmode="decimal"
+        placeholder="—" value="${d.m}"
+        onchange="onLiqInput2(${i},'m',this)"></td>
+      <td><input class="d-input ${vOk}" type="text" inputmode="decimal"
+        placeholder="—" value="${d.v}"
+        onchange="onLiqInput2(${i},'v',this)"></td>
+      <td>
+        ${hasData && revealed
+          ? `<span class="rho-cell">${rho}</span>`
+          : hasData && !revealed
+            ? `<button class="reveal-btn" onclick="revealLiqDensity(${i})">顯示 D</button>`
+            : `<span class="rho-empty">—</span>`
+        }
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function onLiqInput2(idx, field, el){
+  const val = el.value.trim();
+  const num = parseFloat(val);
+  if(val!=='' && (isNaN(num)||num<0)){ el.style.borderColor='var(--red)'; return; }
+  liquidEntries2[currentLiquid][idx][field] = val;
+  liquidEntries2[currentLiquid][idx].revealed = false;
+  el.classList.toggle('ok', val!=='');
+  el.style.borderColor='';
+  renderLiquidTable();
+  renderLiquidChart();
+}
+
+function revealLiqDensity(idx){
+  liquidEntries2[currentLiquid][idx].revealed = true;
+  renderLiquidTable();
+}
+
+function resetLiquid(){
+  if(!confirm('確定清除目前液體的所有紀錄？')) return;
+  liquidEntries2[currentLiquid] = Array.from({length:5},()=>({m:'',v:'',revealed:false}));
+  liqZeroed = false;
+  liqVol = 0;
+  liqTareOffset = 0;
+  renderLiquidInstruments();
+  renderLiquidTable();
+  renderLiquidChart();
+}
+
+function buildLiqTrendControls(){
+  const wrap = document.getElementById('liqTrendControls');
+  if(!wrap) return;
+  wrap.innerHTML = '';
+  // 顯示所有液體的趨勢線按鈕（不管有無數據，有數據才能實際畫線）
+  LIQUIDS.forEach(liq=>{
+    const btn = document.createElement('button');
+    const isOn = liqTrendVisible[liq.id];
+    btn.className = 'trend-btn'+(isOn?' active':'');
+    btn.id = 'liqtrendbtn-'+liq.id;
+    btn.style.borderColor = isOn ? liq.color : '';
+    btn.style.backgroundColor = isOn ? liq.color+'33' : '';
+    btn.style.color = isOn ? liq.color : '';
+    btn.innerHTML = `<span style="width:12px;height:12px;border-radius:50%;background:${liq.color};display:inline-block;"></span> ${liq.name} 趨勢線`;
+    btn.onclick = ()=>{ liqTrendVisible[liq.id]=!liqTrendVisible[liq.id]; buildLiqTrendControls(); renderLiquidChart(); };
+    wrap.appendChild(btn);
+  });
+}
+
+// ═══════════════════════════════════════════
+//  LIQUID CHART
+// ═══════════════════════════════════════════
+function renderLiquidChart(){
+  const ctx = document.getElementById('liquidChart').getContext('2d');
+  if(liquidChartInst) liquidChartInst.destroy();
+
+  const datasets = [];
+  LIQUIDS.forEach(liq=>{
+    const pts = liquidEntries2[liq.id]
+      .map(d=>{ if(d.m===''||d.v===''||+d.v<=0) return null; return {x:+d.v,y:+d.m}; })
+      .filter(Boolean);
+    if(pts.length===0) return;
+
+    datasets.push({
+      label: liq.icon+' '+liq.name+'（量測）',
+      data: pts,
+      type:'scatter',
+      backgroundColor: liq.color+'cc',
+      borderColor: liq.color,
+      pointRadius:10, pointHoverRadius:13, order:2,
+    });
+
+    const rhos  = pts.map(p=>p.y/p.x);
+    const slope = rhos.reduce((a,b)=>a+b,0)/rhos.length;
+    const maxV  = Math.max(...pts.map(p=>p.x))*1.2;
+
+    if(liqTrendVisible[liq.id]){
+      datasets.push({
+        label: liq.name+' 趨勢線 D≈'+slope.toFixed(4)+' g/cm³',
+        data:[{x:0,y:0},{x:maxV,y:slope*maxV}],
+        type:'line', borderColor:liq.color, borderWidth:2.5,
+        pointRadius:0, fill:false, order:1,
+      });
+      datasets.push({
+        label: liq.name+' 標準值 D='+liq.ref,
+        data:[{x:0,y:0},{x:maxV,y:liq.ref*maxV}],
+        type:'line', borderColor:liq.color+'55', borderWidth:1.5,
+        borderDash:[3,6], pointRadius:0, fill:false, order:1,
+      });
+    }
+  });
+
+  const noData = datasets.length===0;
+
+  liquidChartInst = new Chart(ctx,{
+    type:'scatter',
+    data:{ datasets: noData?[]:datasets },
+    plugins: noData ? [emptyTextPlugin('請在左側表格填入量測數據')] : [],
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{
+        legend:{
+          display:!noData,
+          labels:{color:'#1b2e1b',boxWidth:16,font:{size:15,weight:'600'},
+            filter:item=>!item.text.includes('標準值')
+          }
+        },
+        tooltip:{callbacks:{label:c=>{
+          if(c.raw&&c.raw.x!==undefined){
+            const r=(c.raw.y/c.raw.x).toFixed(4);
+            return `V=${c.raw.x} cm³, M=${c.raw.y} g → D=${r} g/cm³`;
+          }
+          return c.dataset.label;
+        }},bodyFont:{size:14},titleFont:{size:14}}
+      },
+      scales:{
+        x:{title:{display:true,text:'體積 V (cm³)',color:'#2e7d32',font:{size:15,weight:'600'}},ticks:{color:'#2e7d32',font:{size:14}},grid:{color:'rgba(165,214,167,0.5)'},beginAtZero:true},
+        y:{title:{display:true,text:'質量 M (g)',color:'#2e7d32',font:{size:15,weight:'600'}},ticks:{color:'#2e7d32',font:{size:14}},grid:{color:'rgba(165,214,167,0.5)'},beginAtZero:true},
+      }
+    }
+  });
+}
+
+// ═══════════════════════════════════════════
+//  DROP ZONES (for keyboard / accessibility)
+// ═══════════════════════════════════════════
+function setupDropZones(){
+  // Balance zone click (if nothing dragging, just a fallback)
+  document.getElementById('balanceZone').addEventListener('click', ()=>{
+    // handled by shelf item click
+  });
+}
+
+// ═══════════════════════════════════════════
+//  ANIMATE NUMBER
+// ═══════════════════════════════════════════
+function animateNumber(elId, from, to, dur, decimals){
+  const el = document.getElementById(elId);
+  const start = performance.now();
+  function step(now){
+    const t = Math.min((now-start)/dur,1);
+    const ease = 1-Math.pow(1-t,3);
+    el.textContent = (from+(to-from)*ease).toFixed(decimals);
+    if(t<1) requestAnimationFrame(step);
+    else el.textContent = to.toFixed(decimals);
+  }
+  requestAnimationFrame(step);
+}
+
+// ═══════════════════════════════════════════
+//  EMPTY CHART PLUGIN
+// ═══════════════════════════════════════════
+function emptyTextPlugin(msg){
+  return {
+    id:'emptyText',
+    afterDraw(chart){
+      const {ctx,width,height} = chart;
+      if(chart.data.datasets.length===0){
+        ctx.save();
+        ctx.textAlign='center'; ctx.textBaseline='middle';
+        ctx.fillStyle='#4a7a4a'; ctx.font='16px Segoe UI';
+        ctx.fillText(msg, width/2, height/2);
+        ctx.restore();
+      }
+    }
+  };
+}
+
+// ═══════════════════════════════════════════
+//  TOAST
+// ═══════════════════════════════════════════
+let toastTimer;
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>t.classList.remove('show'), 2800);
+}
+
+// ── START ──
+init();
+</script>
+</body>
+</html>
