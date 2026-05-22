@@ -4,6 +4,9 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>密度實驗室</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
@@ -12,7 +15,7 @@
   --accent:#2e7d32;--green:#1b5e20;--yellow:#f57f17;--red:#c62828;
   --text:#1b2e1b;--muted:#4a7a4a;--radius:14px;
 }
-body{font-family:'Segoe UI','Microsoft JhengHei',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;user-select:none;font-size:18px;}
+body{font-family:'Nunito','Noto Sans TC','Microsoft JhengHei',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;user-select:none;font-size:18px;letter-spacing:0.01em;}
 
 /* HEADER */
 header{background:linear-gradient(135deg,#2e7d32,#1b5e20);border-bottom:2px solid #388e3c;padding:14px 28px;display:flex;align-items:center;gap:14px;}
@@ -358,7 +361,7 @@ header p{font-size:1rem;color:#a5d6a7;margin-top:4px;}
               <div class="cylinder-label">🧪 量筒</div>
               <div class="cylinder-top"></div>
               <div class="cylinder-body drop-zone" id="cylinderZone">
-                <div class="cylinder-water" id="cylinderWater" style="height:40%;"></div>
+                <div class="cylinder-water" id="cylinderWater" style="height:50%;"></div>
                 <div class="cylinder-object" id="cylinderObj" style="display:none;"></div>
                 <div class="cylinder-scale">
                   <span>200</span><span>160</span><span>120</span><span>80</span><span>40</span><span>0</span>
@@ -445,27 +448,78 @@ header p{font-size:1rem;color:#a5d6a7;margin-top:4px;}
           <div style="display:flex;flex-direction:row;align-items:flex-end;gap:20px;">
             <div style="display:flex;flex-direction:column;align-items:center;">
               <div style="font-size:1rem;font-weight:700;color:var(--muted);letter-spacing:1px;margin-bottom:10px;">⚖️ 電子天平 + 量筒</div>
-              <!-- Cylinder sitting on balance plate -->
-              <div style="display:flex;flex-direction:column;align-items:center;">
-                <!-- Volume control above cylinder -->
-                <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
-                  <button class="vol-btn" onclick="changeLiqVol(-10)">－</button>
-                  <span id="liqVolLabel" style="font-size:1.1rem;font-weight:700;color:var(--accent);min-width:70px;text-align:center;">0 cm³</span>
-                  <button class="vol-btn" onclick="changeLiqVol(+10)">＋</button>
-                </div>
-                <!-- Cylinder visual on the plate -->
-                <div class="cylinder-top" style="width:90px;"></div>
-                <div id="liqCylinder" class="cylinder-body" style="width:80px;height:180px;border-color:#81c784;">
-                  <div id="liqWater" class="cylinder-water" style="height:0%;"></div>
-                  <div class="cylinder-scale">
-                    <span>200</span><span>160</span><span>120</span><span>80</span><span>40</span><span>0</span>
-                  </div>
-                </div>
+              <!-- Volume control above cylinder -->
+              <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+                <input id="liqVolInput" type="text" inputmode="decimal"
+                  value="0"
+                  placeholder="體積"
+                  style="width:90px;padding:8px 10px;font-size:1.1rem;font-weight:700;color:var(--accent);text-align:center;background:#f9fbe7;border:2px solid var(--border);border-radius:8px;outline:none;"
+                  onchange="onLiqVolInput(this)">
+                <span style="font-size:1rem;color:var(--muted);font-weight:600;">cm³</span>
               </div>
-              <!-- Balance plate directly under cylinder -->
-              <div class="balance-plate" style="width:180px;" id="liqBalancePlate"></div>
-              <div class="balance-stand"></div>
-              <div class="balance-base"></div>
+              <!-- Cylinder + Balance all in one SVG -->
+              <svg id="liqCylinderSVG" width="200" height="300" viewBox="-20 0 220 300" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <clipPath id="liqClip">
+                    <rect x="30" y="10" width="60" height="200"/>
+                  </clipPath>
+                </defs>
+
+                <!-- 液體填充 -->
+                <rect id="liqWater" x="30" y="210" width="60" height="0"
+                  fill="rgba(100,181,246,0.55)" clip-path="url(#liqClip)"/>
+                <!-- 液體頂部線 -->
+                <rect id="liqWaterTop" x="30" y="210" width="60" height="2"
+                  fill="rgba(33,150,243,0.85)" clip-path="url(#liqClip)"/>
+
+                <!-- 量筒筒身 -->
+                <rect x="30" y="10" width="60" height="200"
+                  fill="rgba(240,255,240,0.5)" stroke="#81c784" stroke-width="2.5" rx="2"/>
+                <!-- 管口 -->
+                <rect x="26" y="4" width="68" height="10"
+                  fill="rgba(200,230,201,0.4)" stroke="#81c784" stroke-width="2" rx="3"/>
+
+                <!-- 刻度線（右側）y = 10 + (100-val)/100*200 -->
+                <line x1="90" y1="10"  x2="104" y2="10"  stroke="#2e7d32" stroke-width="2"/>
+                <text x="107" y="14"  font-size="11" fill="#2e7d32" font-weight="700" font-family="Nunito,sans-serif">100</text>
+                <line x1="90" y1="30"  x2="98"  y2="30"  stroke="#66bb6a" stroke-width="1.5"/>
+                <text x="101" y="34"  font-size="10" fill="#66bb6a" font-weight="600" font-family="Nunito,sans-serif">90</text>
+                <line x1="90" y1="50"  x2="104" y2="50"  stroke="#2e7d32" stroke-width="2"/>
+                <text x="107" y="54"  font-size="11" fill="#2e7d32" font-weight="700" font-family="Nunito,sans-serif">80</text>
+                <line x1="90" y1="70"  x2="98"  y2="70"  stroke="#66bb6a" stroke-width="1.5"/>
+                <text x="101" y="74"  font-size="10" fill="#66bb6a" font-weight="600" font-family="Nunito,sans-serif">70</text>
+                <line x1="90" y1="90"  x2="104" y2="90"  stroke="#2e7d32" stroke-width="2"/>
+                <text x="107" y="94"  font-size="11" fill="#2e7d32" font-weight="700" font-family="Nunito,sans-serif">60</text>
+                <line x1="90" y1="110" x2="98"  y2="110" stroke="#66bb6a" stroke-width="1.5"/>
+                <text x="101" y="114" font-size="10" fill="#66bb6a" font-weight="600" font-family="Nunito,sans-serif">50</text>
+                <line x1="90" y1="130" x2="104" y2="130" stroke="#2e7d32" stroke-width="2"/>
+                <text x="107" y="134" font-size="11" fill="#2e7d32" font-weight="700" font-family="Nunito,sans-serif">40</text>
+                <line x1="90" y1="150" x2="98"  y2="150" stroke="#66bb6a" stroke-width="1.5"/>
+                <text x="101" y="154" font-size="10" fill="#66bb6a" font-weight="600" font-family="Nunito,sans-serif">30</text>
+                <line x1="90" y1="170" x2="104" y2="170" stroke="#2e7d32" stroke-width="2"/>
+                <text x="107" y="174" font-size="11" fill="#2e7d32" font-weight="700" font-family="Nunito,sans-serif">20</text>
+                <line x1="90" y1="190" x2="98"  y2="190" stroke="#66bb6a" stroke-width="1.5"/>
+                <text x="101" y="194" font-size="10" fill="#66bb6a" font-weight="600" font-family="Nunito,sans-serif">10</text>
+                <text x="32" y="222" font-size="10" fill="#4a7a4a" font-family="Nunito,sans-serif">(mL)</text>
+
+                <!-- 天平秤盤（置中，量筒中心在 x=60，秤盤寬160，左起 x=60-80=-20 → 用 viewBox 調整）-->
+                <!-- 量筒中心 x=30+30=60，秤盤寬160，左邊 x=60-80=-20，但 viewBox 從0開始 -->
+                <!-- 所以秤盤 x=-20，viewBox 改成 -20 0 220 320 -->
+                <rect x="-20" y="212" width="160" height="10"
+                  fill="url(#plateGrad)" stroke="#4caf50" stroke-width="1.5" rx="4"/>
+                <defs>
+                  <linearGradient id="plateGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#81c784"/>
+                    <stop offset="100%" stop-color="#66bb6a"/>
+                  </linearGradient>
+                </defs>
+
+                <!-- 天平支架（量筒中心 x=60，支架置中）-->
+                <rect x="57" y="222" width="6" height="44" fill="#4caf50" rx="2"/>
+
+                <!-- 天平底座（置中於量筒）-->
+                <rect x="-5" y="266" width="130" height="12" fill="#4caf50" rx="4"/>
+              </svg>
             </div>
             <!-- Readout panel -->
             <div style="display:flex;flex-direction:column;gap:12px;padding-bottom:4px;">
@@ -897,7 +951,7 @@ function clearInstruments(keepUsed=false){
   document.getElementById('balanceVal').textContent = '0.00';
   document.getElementById('balanceItemDisplay').innerHTML = '';
   document.getElementById('cylinderVal').textContent = String(WATER_BASE);
-  document.getElementById('cylinderWater').style.height = (WATER_BASE/200*100)+'%';
+  document.getElementById('cylinderWater').style.height = (WATER_BASE/200*100)+'%'; // 100/200*100 = 50%
   document.getElementById('cylinderObj').style.display = 'none';
   document.getElementById('activeItemBar').style.display = 'none';
 }
@@ -1103,7 +1157,7 @@ let liqVol = 0;         // cm³ currently in cylinder
 let liqZeroed = false;  // has tare been pressed?
 let liqTareOffset = 0;  // mass of empty cylinder (virtual)
 const LIQ_CYL_MASS = 20; // virtual cylinder tare mass (g)
-const LIQ_MAX_VOL = 200;
+const LIQ_MAX_VOL = 100;
 
 // liquidEntries2[liqId][idx] = {m:'', v:'', revealed:false}
 const liquidEntries2 = {};
@@ -1147,6 +1201,18 @@ function changeLiqVol(delta){
   renderLiquidInstruments();
 }
 
+function onLiqVolInput(el){
+  const val = parseFloat(el.value);
+  if(isNaN(val) || val < 0){
+    el.style.borderColor = 'var(--red)';
+    return;
+  }
+  el.style.borderColor = '';
+  liqVol = Math.min(LIQ_MAX_VOL, Math.max(0, val));
+  el.value = liqVol;
+  renderLiquidInstruments();
+}
+
 function liqZero(){
   if(liqZeroed){
     // 再按一次 → 復原
@@ -1169,28 +1235,34 @@ function renderLiquidInstruments(){
   const liq = LIQUIDS.find(l=>l.id===currentLiquid);
   if(!liq) return;
 
-  // Update volume label
-  const volLabel = document.getElementById('liqVolLabel');
-  if(volLabel) volLabel.textContent = liqVol + ' cm³';
+  // Update volume input
+  const volInput = document.getElementById('liqVolInput');
+  if(volInput && document.activeElement !== volInput) volInput.value = liqVol;
 
-  // Update main cylinder fill (pct of 200)
-  const cylPct = (liqVol / LIQ_MAX_VOL) * 100;
+  // SVG 量筒：內部液體區 y=10(頂)~210(底)，高度200px
+  // vol=100 → y=10, h=200；vol=0 → y=210, h=0
+  const svgH = (liqVol / LIQ_MAX_VOL) * 200;
+  const svgY = 210 - svgH; // 底部固定在 y=210，往上填充
+  const isOil = liq.id === 'oil';
+  const waterColor = isOil ? 'rgba(251,191,36,0.55)' : 'rgba(100,181,246,0.55)';
+  const topColor   = isOil ? 'rgba(245,158,11,0.9)'  : 'rgba(33,150,243,0.85)';
+
   const liqWater = document.getElementById('liqWater');
   if(liqWater){
-    liqWater.style.height = cylPct + '%';
-    liqWater.style.background = liq.id==='oil'
-      ? 'linear-gradient(180deg,rgba(251,191,36,0.7),rgba(245,158,11,0.5))'
-      : 'linear-gradient(180deg,rgba(100,181,246,0.65),rgba(25,118,210,0.5))';
-    liqWater.style.borderTop = '2px solid '+(liq.id==='oil'?'rgba(245,158,11,0.9)':'rgba(33,150,243,0.9)');
+    liqWater.style.transition = 'y 0.6s cubic-bezier(.34,1.1,.64,1), height 0.6s cubic-bezier(.34,1.1,.64,1)';
+    liqWater.setAttribute('x', '30');
+    liqWater.setAttribute('y', svgH > 0 ? svgY : 210);
+    liqWater.setAttribute('width', '60');
+    liqWater.setAttribute('height', Math.max(0, svgH));
+    liqWater.setAttribute('fill', waterColor);
   }
-
-  // Update mini cylinder on balance
-  const miniWater = document.getElementById('liqMiniWater');
-  if(miniWater){
-    miniWater.style.height = cylPct + '%';
-    miniWater.style.background = liq.id==='oil'
-      ? 'linear-gradient(180deg,rgba(251,191,36,0.7),rgba(245,158,11,0.5))'
-      : 'linear-gradient(180deg,rgba(100,181,246,0.65),rgba(25,118,210,0.5))';
+  const liqWaterTop = document.getElementById('liqWaterTop');
+  if(liqWaterTop){
+    liqWaterTop.style.transition = 'y 0.6s cubic-bezier(.34,1.1,.64,1)';
+    liqWaterTop.setAttribute('x', '30');
+    liqWaterTop.setAttribute('y', svgH > 0 ? svgY : 210);
+    liqWaterTop.setAttribute('width', '60');
+    liqWaterTop.setAttribute('fill', topColor);
   }
 
   // Compute balance reading
@@ -1409,7 +1481,7 @@ function emptyTextPlugin(msg){
       if(chart.data.datasets.length===0){
         ctx.save();
         ctx.textAlign='center'; ctx.textBaseline='middle';
-        ctx.fillStyle='#4a7a4a'; ctx.font='16px Segoe UI';
+        ctx.fillStyle='#4a7a4a'; ctx.font='16px Nunito, Noto Sans TC, sans-serif';
         ctx.fillText(msg, width/2, height/2);
         ctx.restore();
       }

@@ -8,10 +8,6 @@
 
 👉 **[點我開啟實驗室](https://kuojiajie.github.io/Density-experiment/density-experiment.html)**
 
-```
-https://kuojiajie.github.io/Density-experiment/density-experiment.html
-```
-
 > 無需安裝任何軟體，用瀏覽器直接開啟即可使用。
 
 ---
@@ -79,8 +75,8 @@ https://kuojiajie.github.io/Density-experiment/density-experiment.html
 - 之後天平只顯示**液體淨質量 M**
 - 再按一次可**復原**回總質量模式
 
-**③ 加入液體**
-- 按「**＋**」增加液體（每次 +10 cm³），「**－**」減少
+**③ 輸入液體體積**
+- 在輸入框直接填入體積數值（cm³）
 - 量筒動畫同步顯示液位
 
 **④ 讀取並記錄數據**
@@ -108,13 +104,6 @@ https://kuojiajie.github.io/Density-experiment/density-experiment.html
 | **趨勢線按鈕** | 開啟後顯示趨勢線，斜率 = 密度 D |
 | **虛線** | 代表標準密度值（供對照參考） |
 | **Tooltip** | 滑鼠移到數據點，顯示 V、M、D 數值 |
-
----
-
-## 🖥️ 系統需求
-
-- Chrome、Firefox、Edge、Safari 等現代瀏覽器皆可
-- 無需安裝軟體，無需網路（下載後可離線使用）
 
 ---
 
