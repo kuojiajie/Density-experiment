@@ -79,7 +79,7 @@ header p{font-size:1rem;color:#a5d6a7;margin-top:4px;}
 /* Balance */
 .balance-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:0;}
 .balance-label{font-size:0.9rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;align-self:flex-start;font-weight:700;}
-.balance-body{width:100%;background:#f1f8e9;border:2px solid var(--border);border-radius:12px;padding:14px 12px;display:flex;flex-direction:column;align-items:center;gap:0;position:relative;justify-content:center;}
+.balance-body{width:100%;background:#f1f8e9;border:2px solid var(--border);border-radius:12px;padding:14px 12px;display:flex;flex-direction:column;align-items:center;gap:0;position:relative;justify-content:flex-end;min-height:160px;}
 .balance-plate{
   width:150px;height:14px;background:linear-gradient(180deg,#81c784,#66bb6a);
   border-radius:5px;border:1px solid #4caf50;
@@ -89,7 +89,7 @@ header p{font-size:1rem;color:#a5d6a7;margin-top:4px;}
 .balance-plate.highlight{background:linear-gradient(180deg,rgba(76,175,80,0.6),rgba(56,142,60,0.4));border-color:var(--accent);}
 .balance-stand{width:5px;height:34px;background:#4caf50;margin:0 auto;margin-top:0;}
 .balance-base{width:110px;height:10px;background:#4caf50;border-radius:5px;margin-top:0;}
-.balance-item-on-plate{position:absolute;top:-32px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;}
+.balance-item-on-plate{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);display:flex;flex-direction:row;align-items:flex-end;justify-content:center;gap:2px;}
 
 /* Cylinder */
 .cylinder-wrap{display:flex;flex-direction:column;align-items:center;gap:0;}
@@ -451,10 +451,19 @@ header p{font-size:1rem;color:#a5d6a7;margin-top:4px;}
         </div><!-- /station-row -->
 
         <!-- 天平/量筒狀態列 -->
-        <div id="activeItemBar" style="margin-top:12px;padding:10px 16px;background:var(--panel);border-radius:10px;font-size:0.95rem;color:var(--muted);display:none;">
-          <b id="activeItemName" style="color:var(--text);"></b>&nbsp;&nbsp;
-          <button style="padding:5px 14px;border-radius:7px;border:1.5px solid var(--border);background:none;color:var(--muted);cursor:pointer;font-size:0.85rem;" onclick="clearSolidBalance()">⚖️ 清空天平</button>
-          <button style="padding:5px 14px;border-radius:7px;border:1.5px solid var(--border);background:none;color:var(--muted);cursor:pointer;font-size:0.85rem;margin-left:6px;" onclick="clearSolidCylinder()">🧪 清空量筒</button>
+        <div id="activeItemBar" style="margin-top:12px;padding:10px 16px;background:var(--panel);border-radius:10px;font-size:0.9rem;color:var(--muted);display:block;">
+          <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:8px;">
+            <span style="font-size:0.85rem;">天平上：</span>
+            <span id="solidBalanceTags" style="display:flex;gap:6px;flex-wrap:wrap;"></span>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:8px;">
+            <span style="font-size:0.85rem;">量筒中：</span>
+            <span id="solidCylTags" style="display:flex;gap:6px;flex-wrap:wrap;"></span>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button style="padding:5px 14px;border-radius:7px;border:1.5px solid var(--border);background:none;color:var(--muted);cursor:pointer;font-size:0.85rem;" onclick="clearSolidBalance()">⚖️ 清空天平</button>
+            <button style="padding:5px 14px;border-radius:7px;border:1.5px solid var(--border);background:none;color:var(--muted);cursor:pointer;font-size:0.85rem;" onclick="clearSolidCylinder()">🧪 清空量筒</button>
+          </div>
         </div>
 
       </div><!-- /station -->
@@ -1172,14 +1181,21 @@ function onSinkerEnd(e){
 }
 function dropSinkerOnBalance(){
   if(currentMetal!=='wood'){ showToast('鐵塊僅用於木頭實驗'); return; }
-  if(woodSinkerOnBalance){ showToast('鐵塊已在天平上'); return; }
+  if(solidBalanceObjects.size >= 1 || woodSinkerOnBalance){
+    showToast('天平已有物體，請先清空天平');
+    return;
+  }
   woodSinkerOnBalance=true;
   updateSolidBalanceDisplay();
   showToast('鐵塊放上天平');
 }
 function dropSinkerOnCylinder(){
   if(currentMetal!=='wood'){ showToast('鐵塊僅用於木頭實驗'); return; }
-  if(woodSinkerOnCylinder){ showToast('鐵塊已在量筒中'); return; }
+  const totalInCyl = solidCylObjects.size + (woodSinkerOnCylinder?1:0);
+  if(totalInCyl >= 2){
+    showToast('量筒已滿（最多2項），請先清空量筒');
+    return;
+  }
   woodSinkerOnCylinder=true;
   updateSolidCylinderDisplay();
   showToast('鐵塊放入量筒（+10 cm³）');
@@ -1187,8 +1203,8 @@ function dropSinkerOnCylinder(){
 
 function dropOnBalance(idx){
   if(usedSpecimens[currentMetal].has(idx)) return;
-  if(solidBalanceObjects.has(idx)){
-    showToast(`${METALS[currentMetal].specimens[idx].label} 已在天平上`);
+  if(solidBalanceObjects.size >= 1 || woodSinkerOnBalance){
+    showToast('天平已有物體，請先清空天平');
     return;
   }
   solidBalanceObjects.add(idx);
@@ -1204,28 +1220,43 @@ function updateSolidBalanceDisplay(){
   animateNumber('balanceVal', parseFloat(document.getElementById('balanceVal').textContent||'0'), total, 600, 2);
 
   const plate = document.getElementById('balanceItemDisplay');
+  const sizes = [28,34,40,50,60];
   const items = [];
   solidBalanceObjects.forEach(i=>{
-    items.push(`<div class="metal-3d" style="width:22px;height:22px;background:linear-gradient(135deg,${mat.color},${mat.colorDark});font-size:0.55rem;margin:1px;">${mat.icon}</div>`);
+    const sz = sizes[i] || 30;
+    items.push(`<div class="metal-3d" style="width:${sz}px;height:${sz}px;background:linear-gradient(135deg,${mat.color},${mat.colorDark});font-size:0.7rem;margin:2px;flex-shrink:0;">${mat.icon}</div>`);
   });
   if(currentMetal==='wood' && woodSinkerOnBalance)
-    items.push(`<div class="metal-3d" style="width:22px;height:22px;background:linear-gradient(135deg,#6b7280,#374151);font-size:0.55rem;margin:1px;font-weight:800;">重</div>`);
-  plate.innerHTML = `<div style="display:flex;flex-wrap:wrap;justify-content:center;">${items.join('')}</div>`;
+    items.push(`<div class="metal-3d" style="width:28px;height:28px;background:linear-gradient(135deg,#6b7280,#374151);font-size:0.65rem;margin:2px;font-weight:800;flex-shrink:0;">重</div>`);
+  plate.innerHTML = `<div style="display:flex;flex-wrap:wrap;justify-content:center;align-items:flex-end;">${items.join('')}</div>`;
 
   const bar = document.getElementById('activeItemBar');
-  const hasAny = solidBalanceObjects.size>0||solidCylObjects.size>0||woodSinkerOnBalance||woodSinkerOnCylinder;
-  if(!hasAny){ bar.style.display='none'; return; }
-  bar.style.display='flex'; bar.style.alignItems='center'; bar.style.gap='10px';
-  const bNames=[...solidBalanceObjects].map(i=>mat.specimens[i].label).join('、');
-  const cNames=[...solidCylObjects].map(i=>mat.specimens[i].label).join('、');
-  const bEx=(currentMetal==='wood'&&woodSinkerOnBalance)?' +鐵塊':'';
-  const cEx=(currentMetal==='wood'&&woodSinkerOnCylinder)?' +鐵塊':'';
-  document.getElementById('activeItemName').textContent=
-    (bNames||bEx?'天平：'+(bNames||'')+bEx:'')+(cNames||cEx?' ｜ 量筒：'+(cNames||'')+cEx:'');
+  bar.style.display='block';
+  // 天平標籤
+  const bTags = document.getElementById('solidBalanceTags');
+  if(bTags){
+    const items=[];
+    solidBalanceObjects.forEach(i=>items.push(`<span style="background:${mat.color};color:#fff;border-radius:6px;padding:3px 9px;font-size:0.82rem;font-weight:700;">${mat.specimens[i].label}</span>`));
+    if(currentMetal==='wood'&&woodSinkerOnBalance) items.push(`<span style="background:#374151;color:#fff;border-radius:6px;padding:3px 9px;font-size:0.82rem;font-weight:700;">鐵塊</span>`);
+    bTags.innerHTML = items.join('') || '<span style="color:var(--muted);font-size:0.82rem;">（空）</span>';
+  }
+  // 量筒標籤
+  const cTags = document.getElementById('solidCylTags');
+  if(cTags){
+    const items=[];
+    solidCylObjects.forEach(i=>items.push(`<span style="background:${mat.color};color:#fff;border-radius:6px;padding:3px 9px;font-size:0.82rem;font-weight:700;">${mat.specimens[i].label}</span>`));
+    if(currentMetal==='wood'&&woodSinkerOnCylinder) items.push(`<span style="background:#374151;color:#fff;border-radius:6px;padding:3px 9px;font-size:0.82rem;font-weight:700;">鐵塊</span>`);
+    cTags.innerHTML = items.join('') || '<span style="color:var(--muted);font-size:0.82rem;">（空）</span>';
+  }
 }
 
 function dropOnCylinder(idx){
   if(usedSpecimens[currentMetal].has(idx)) return;
+  const totalInCyl = solidCylObjects.size + (woodSinkerOnCylinder?1:0);
+  if(totalInCyl >= 2){
+    showToast('量筒已滿（最多2項），請先清空量筒');
+    return;
+  }
   if(solidCylObjects.has(idx)){
     showToast(`${METALS[currentMetal].specimens[idx].label} 已在量筒中`);
     return;
@@ -1263,36 +1294,71 @@ function updateSolidCylinderDisplay(){
   const floats = isWood && !woodSinkerOnCylinder && solidCylObjects.size>0;
 
   // 顯示沉底物體（包含重物）
+  // 清除舊的多物體視覺
+  document.querySelectorAll('.solid-cyl-item').forEach(e=>e.remove());
+
   if(solidCylObjects.size>0){
-    const lastIdx=[...solidCylObjects].at(-1);
-    const sp=mat.specimens[lastIdx];
-    const sz=Math.max(14,Math.min(30,10+sp.vol/6));
-    obj.style.display='flex'; obj.style.width=sz+'px'; obj.style.height=sz+'px';
-    obj.style.background=mat.color; obj.textContent=mat.icon; obj.style.fontSize=(sz*0.45)+'px';
+    const sizes=[28,34,40,50,60];
     if(floats){
-      // 漂浮：顯示在水面
-      const wPct=parseFloat(document.getElementById('cylinderWater').style.height||'33.3');
-      obj.style.bottom='auto'; obj.style.top=(100-wPct-8)+'%';
-      obj.style.left='50%'; obj.style.transform='translateX(-50%)';
+      // 浮體：物體中心在水面，水平置中
+      const cylH = document.getElementById('cylinderZone').offsetHeight || 200;
+      const cylW = document.getElementById('cylinderZone').offsetWidth || 110;
+      const wPct = parseFloat(document.getElementById('cylinderWater').style.height||'33.3');
+      const waterPx = cylH * wPct / 100;
+      let offsetX = 0;
+      const arr = [...solidCylObjects];
+      const totalW = arr.reduce((s,i)=>(s+(sizes[i]||30)+4),0);
+      const startX = (cylW-totalW)/2;
+      arr.forEach((i,ri)=>{
+        const sp=mat.specimens[i];
+        const sz=sizes[i]||30;
+        const el=document.createElement('div');
+        el.className='solid-cyl-item';
+        el.style.cssText=`position:absolute;left:${startX+offsetX}px;bottom:${waterPx-sz/2}px;width:${sz}px;height:${sz}px;background:${mat.color};border-radius:4px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:0.7rem;z-index:2;`;
+        el.textContent=mat.icon;
+        document.getElementById('cylinderZone').appendChild(el);
+        offsetX+=sz+4;
+      });
+      obj.style.display='none';
     } else {
-      obj.style.bottom='4px'; obj.style.top='auto';
-      obj.style.left='50%'; obj.style.transform='translateX(-50%)';
+      // 沉底：物體堆疊在底部
+      const arr=[...solidCylObjects];
+      let bottomOffset=4;
+      arr.forEach(i=>{
+        const sz=sizes[i]||30;
+        const el=document.createElement('div');
+        el.className='solid-cyl-item';
+        el.style.cssText=`position:absolute;bottom:${bottomOffset}px;left:50%;transform:translateX(-50%);width:${sz}px;height:${sz}px;background:${mat.color};border-radius:4px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:0.7rem;z-index:2;`;
+        el.textContent=mat.icon;
+        document.getElementById('cylinderZone').appendChild(el);
+        bottomOffset+=sz+2;
+      });
+      obj.style.display='none';
     }
   } else {
     obj.style.display='none';
   }
 
-  // 重物視覺（木頭實驗）
+  // 重物視覺（木頭實驗）：壓在木塊上方
   if(isWood && woodSinkerOnCylinder){
     const sinkerEl = document.createElement('div');
     sinkerEl.className = 'solid-sinker-obj';
+    const sinkerSz = 28;
+    // 木塊沉底時：底部在 4px，木塊高度從 sizes 取，重物壓在木塊上
+    let sinkerBottom = 4;
+    if(solidCylObjects.size > 0){
+      const lastIdx = [...solidCylObjects].at(-1);
+      const woodSz = [28,34,40,50,60][lastIdx] || 30;
+      sinkerBottom = 4 + woodSz; // 重物底部在木塊頂部
+    }
     sinkerEl.style.cssText = `
-      position:absolute;bottom:${solidCylObjects.size>0?'22px':'4px'};
-      left:50%;transform:translateX(-10px);
-      width:20px;height:20px;
+      position:absolute;
+      bottom:${sinkerBottom}px;
+      left:50%;transform:translateX(-50%);
+      width:${sinkerSz}px;height:${sinkerSz}px;
       background:linear-gradient(135deg,#6b7280,#374151);
       border-radius:4px;display:flex;align-items:center;justify-content:center;
-      color:#fff;font-size:0.6rem;font-weight:800;z-index:3;
+      color:#fff;font-size:0.65rem;font-weight:800;z-index:3;
     `;
     sinkerEl.textContent = '重';
     cyl.appendChild(sinkerEl);
@@ -1312,7 +1378,7 @@ function clearSolidCylinder(){
   document.getElementById('cylinderVal').textContent=String(WATER_BASE);
   document.getElementById('cylinderWater').style.height=(WATER_BASE/CYL_MAX_VOL*100)+'%';
   document.getElementById('cylinderObj').style.display='none';
-  document.querySelectorAll('.solid-float-obj, .solid-sinker-obj').forEach(e=>e.remove());
+  document.querySelectorAll('.solid-float-obj, .solid-sinker-obj, .solid-cyl-item').forEach(e=>e.remove());
   updateSolidBalanceDisplay();
 }
 function clearInstruments(){
@@ -1323,7 +1389,8 @@ function clearInstruments(){
   document.getElementById('cylinderVal').textContent=String(WATER_BASE);
   document.getElementById('cylinderWater').style.height=(WATER_BASE/CYL_MAX_VOL*100)+'%';
   document.getElementById('cylinderObj').style.display='none';
-  document.getElementById('activeItemBar').style.display='none';
+  document.querySelectorAll('.solid-float-obj, .solid-sinker-obj, .solid-cyl-item').forEach(e=>e.remove());
+  updateSolidBalanceDisplay();
 }
 
 // ═══════════════════════════════════════════
@@ -2076,11 +2143,14 @@ function quickSelectUnk(idx){
 function dropUnkOnBalance(idx){
   if(unkMasses.length===0){ showToast('請先出題'); return; }
   const isSinker = idx==='sinker';
+  const totalOnBalance = unkBalanceObjects.size + (unkBalanceHasSinker?1:0);
+  if(totalOnBalance >= 1){
+    showToast('天平已有物體，請先清空天平');
+    return;
+  }
   if(isSinker){
-    if(unkBalanceHasSinker){ showToast('重物已在天平上'); return; }
     unkBalanceHasSinker = true;
   } else {
-    if(unkBalanceObjects.has(idx)){ showToast(`物體 ${UNK_LABELS[idx]} 已在天平上`); return; }
     unkBalanceObjects.add(idx);
   }
   updateUnkBalanceDisplay();
@@ -2099,9 +2169,13 @@ function updateUnkBalanceDisplay(){
   const plate = document.getElementById('unkBalanceItemDisplay');
   if(plate){
     const items = [];
-    unkBalanceObjects.forEach(i=>items.push(`<div class="metal-3d" style="width:20px;height:20px;background:linear-gradient(135deg,${UNK_BLOCK_COLOR},${UNK_BLOCK_DARK});font-size:0.6rem;font-weight:800;margin:1px;">${UNK_LABELS[i]}</div>`));
-    if(unkBalanceHasSinker) items.push(`<div class="metal-3d" style="width:20px;height:20px;background:linear-gradient(135deg,#6b7280,#374151);font-size:0.55rem;font-weight:800;margin:1px;">重</div>`);
-    plate.innerHTML = `<div style="display:flex;flex-wrap:wrap;justify-content:center;">${items.join('')}</div>`;
+    unkBalanceObjects.forEach(i=>{
+      const vol = unkVols[i]||12;
+      const sz = Math.round(22+(Math.min(vol,25)-6)/(25-6)*22);
+      items.push(`<div class="metal-3d" style="width:${sz}px;height:${sz}px;background:linear-gradient(135deg,${UNK_BLOCK_COLOR},${UNK_BLOCK_DARK});font-size:${Math.max(9,Math.round(sz*0.38))}px;font-weight:800;margin:2px;flex-shrink:0;">${UNK_LABELS[i]}</div>`);
+    });
+    if(unkBalanceHasSinker) items.push(`<div class="metal-3d" style="width:30px;height:30px;background:linear-gradient(135deg,#6b7280,#374151);font-size:0.6rem;font-weight:800;margin:2px;flex-shrink:0;">重</div>`);
+    plate.innerHTML = `<div style="display:flex;flex-wrap:wrap;justify-content:center;align-items:flex-end;">${items.join('')}</div>`;
   }
 }
 
@@ -2116,6 +2190,11 @@ function clearUnkBalance(){
 function dropUnkOnCylinder(idx){
   if(unkMasses.length===0){ showToast('請先出題'); return; }
   const isSinker = idx==='sinker';
+  const totalInCyl = unkCylObjects.size + (unkCylHasSinker?1:0);
+  if(totalInCyl >= 2){
+    showToast('量筒已滿（最多2項），請先清空量筒');
+    return;
+  }
   if(isSinker){
     if(unkCylHasSinker){ showToast('重物已在量筒中'); return; }
     unkCylHasSinker = true;
@@ -2169,30 +2248,49 @@ function renderUnkCylObjects(liqD){
   if(!obj) return;
   if(unkCylObjects.size===0 && !unkCylHasSinker){ obj.style.display='none'; return; }
 
-  // 簡單顯示：沉底的在下，浮的在水面
+  // 依放入順序排列：沉底的堆疊，浮的在水面
+  // 收集沉底與浮體（保持放入順序）
   const sunkItems = [], floatItems = [];
-  if(unkCylHasSinker) sunkItems.push('重');
+  // 先把所有放入的物體按放入順序排列（unkCylObjects 是 Set，依插入順序）
   unkCylObjects.forEach(i=>{
     const d = unkDensities[i]||1.0;
-    if(d>=liqD||unkCylHasSinker) sunkItems.push(UNK_LABELS[i]);
-    else floatItems.push(UNK_LABELS[i]);
+    if(d>=liqD) floatItems.push(UNK_LABELS[i]); // 先判斷浮沉
+    else sunkItems.push(UNK_LABELS[i]);
+  });
+  // 重物永遠沉底，但放在已放入物體的上方（依放入時機）
+  if(unkCylHasSinker){
+    // 若有重物，所有浮體變沉底（因為重物把它們壓下去），並重新排列
+    // 不用 sinker 固定在最下面，而是依放入順序
+    sunkItems.push(...floatItems); // 浮體因重物變沉底
+    floatItems.length = 0;
+    sunkItems.push('重'); // 重物在最後放入，所以在最上方
+  }
+
+  // 先清除所有舊視覺
+  obj.style.display = 'none';
+  document.querySelectorAll('.unk-sink-obj, .unk-float-obj').forEach(e=>e.remove());
+
+  const unkCylEl = document.getElementById('unkCylinderZone');
+
+  // 沉底物體：由下往上堆疊
+  let stackBottom = 4;
+  sunkItems.forEach(lb=>{
+    let sz = 30;
+    if(lb !== '重'){
+      const unkIdx = UNK_LABELS.indexOf(lb);
+      if(unkIdx >= 0){ const vol=unkVols[unkIdx]||12; sz=Math.round(22+(Math.min(vol,25)-6)/(25-6)*22); }
+    }
+    const fs = lb==='重'?'0.6rem':Math.max(9,Math.round(sz*0.38))+'px';
+    const cylW = unkCylEl.offsetWidth||110;
+    const el = document.createElement('div');
+    el.className='unk-sink-obj';
+    el.style.cssText=`position:absolute;bottom:${stackBottom}px;left:${(cylW-sz)/2}px;width:${sz}px;height:${sz}px;background:${lb==='重'?'#374151':UNK_BLOCK_COLOR};color:#fff;border-radius:4px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:${fs};z-index:2;`;
+    el.textContent=lb;
+    unkCylEl.appendChild(el);
+    stackBottom+=sz+2;
   });
 
-  obj.style.display = 'flex';
-  obj.style.flexDirection = 'column';
-  obj.style.alignItems = 'center';
-  obj.style.width = '80%';
-  obj.style.height = 'auto';
-  obj.style.bottom = '4px';
-  obj.style.top = 'auto';
-  obj.style.background = 'none';
-  obj.style.fontSize = '0.7rem';
-  obj.innerHTML = [
-    ...sunkItems.map(lb=>`<div style="background:${lb==='重'?'#374151':UNK_BLOCK_COLOR};color:#fff;border-radius:4px;padding:2px 5px;margin:1px;font-weight:800;font-size:0.7rem;">${lb}</div>`),
-  ].join('');
-
   // 漂浮物體用絕對定位在水面
-  document.querySelectorAll('.unk-float-obj').forEach(e=>e.remove());
   const cyl = document.getElementById('unkCylinderZone');
   const cylHeight = cyl.offsetHeight || 200;
   const waterH = parseFloat(document.getElementById('unkCylinderWater').style.height||'50');
@@ -2201,8 +2299,17 @@ function renderUnkCylObjects(liqD){
   floatItems.forEach((lb,fi)=>{
     const el = document.createElement('div');
     el.className = 'unk-float-obj';
-    // bottom = 水面高度（px），讓物體底部剛好在水面上
-    el.style.cssText = `position:absolute;left:${10+fi*26}px;bottom:${Math.max(0,waterPx-2)}px;background:${UNK_BLOCK_COLOR};color:#fff;border-radius:4px;padding:2px 5px;font-weight:800;font-size:0.7rem;z-index:2;`;
+    // 依體積決定大小
+    const unkIdx = UNK_LABELS.indexOf(lb);
+    const vol = (unkIdx>=0 && unkVols[unkIdx]) ? unkVols[unkIdx] : 12;
+    const sz = Math.round(22+(Math.min(vol,25)-6)/(25-6)*22);
+    const fs = Math.max(9,Math.round(sz*0.38));
+    // 物體中心在水面，水平置中
+    const cylW = cyl.offsetWidth || 110;
+    const totalW = floatItems.length * (sz + 4);
+    const startX = Math.max(4, (cylW - totalW) / 2);
+    const bottomPx = Math.max(0, waterPx - sz/2);
+    el.style.cssText = `position:absolute;left:${startX + fi*(sz+4)}px;bottom:${bottomPx}px;width:${sz}px;height:${sz}px;background:${UNK_BLOCK_COLOR};color:#fff;border-radius:4px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:${fs}px;z-index:2;flex-shrink:0;`;
     el.textContent = lb;
     cyl.appendChild(el);
   });
@@ -2239,6 +2346,7 @@ function clearUnkCylinder(){
   unkCylHasSinker = false;
   document.querySelectorAll('.unk-float-obj').forEach(e=>e.remove());
   const obj = document.getElementById('unkCylinderObj'); if(obj) obj.style.display='none';
+  document.querySelectorAll('.unk-sink-obj').forEach(e=>e.remove());
   updateUnkCylinder();
   updateUnkItemTags();
 }
