@@ -78,24 +78,24 @@ header p{font-size:1rem;color:#a5d6a7;margin-top:4px;}
 
 /* Balance */
 .balance-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:0;}
-.balance-label{font-size:1rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;align-self:flex-start;font-weight:700;}
-.balance-body{width:100%;background:#f1f8e9;border:2px solid var(--border);border-radius:12px;padding:18px 16px;display:flex;flex-direction:column;align-items:center;gap:0;position:relative;justify-content:center;}
+.balance-label{font-size:0.9rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;align-self:flex-start;font-weight:700;}
+.balance-body{width:100%;background:#f1f8e9;border:2px solid var(--border);border-radius:12px;padding:14px 12px;display:flex;flex-direction:column;align-items:center;gap:0;position:relative;justify-content:center;}
 .balance-plate{
-  width:180px;height:18px;background:linear-gradient(180deg,#81c784,#66bb6a);
+  width:150px;height:14px;background:linear-gradient(180deg,#81c784,#66bb6a);
   border-radius:5px;border:1px solid #4caf50;
   display:flex;align-items:center;justify-content:center;
   position:relative;transition:background .3s;
 }
 .balance-plate.highlight{background:linear-gradient(180deg,rgba(76,175,80,0.6),rgba(56,142,60,0.4));border-color:var(--accent);}
-.balance-stand{width:6px;height:42px;background:#4caf50;margin:0 auto;margin-top:0;}
-.balance-base{width:140px;height:12px;background:#4caf50;border-radius:5px;margin-top:0;}
-.balance-item-on-plate{position:absolute;top:-38px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;}
+.balance-stand{width:5px;height:34px;background:#4caf50;margin:0 auto;margin-top:0;}
+.balance-base{width:110px;height:10px;background:#4caf50;border-radius:5px;margin-top:0;}
+.balance-item-on-plate{position:absolute;top:-32px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;}
 
 /* Cylinder */
 .cylinder-wrap{display:flex;flex-direction:column;align-items:center;gap:0;}
 .cylinder-label{font-size:1rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;align-self:flex-start;font-weight:700;}
 .cylinder-body{
-  width:130px;height:240px;
+  width:110px;height:200px;
   background:rgba(200,230,201,0.2);
   border:3px solid #81c784;
   border-top:none;border-radius:0 0 14px 14px;
@@ -120,7 +120,7 @@ header p{font-size:1rem;color:#a5d6a7;margin-top:4px;}
   padding:4px 0;pointer-events:none;
 }
 .cylinder-scale span{font-size:0.7rem;color:#388e3c;line-height:1;font-weight:600;}
-.cylinder-top{width:144px;height:14px;background:rgba(129,199,132,0.3);border:3px solid #81c784;border-bottom:none;border-radius:5px 5px 0 0;margin:0 auto;}
+.cylinder-top{width:122px;height:12px;background:rgba(129,199,132,0.3);border:3px solid #81c784;border-bottom:none;border-radius:5px 5px 0 0;margin:0 auto;}
 
 
 /* Drop zones */
@@ -320,7 +320,7 @@ header p{font-size:1rem;color:#a5d6a7;margin-top:4px;}
   display:flex;flex-direction:column;
   background:linear-gradient(180deg,#dcedc8,#c8e6c9);
   border:1px solid var(--border);border-radius:12px;
-  padding:16px 20px 20px;
+  padding:14px 16px 18px;
   min-width:220px;
   flex-shrink:0;
 }
@@ -337,22 +337,22 @@ header p{font-size:1rem;color:#a5d6a7;margin-top:4px;}
 .instrument-readout{
   display:flex;flex-direction:column;
   justify-content:flex-end;
-  gap:10px;
+  gap:8px;
   padding-bottom:4px;
 }
 .readout-box{
   background:#f9fbe7;border:2px solid var(--border);border-radius:10px;
-  padding:12px 18px;text-align:center;min-width:145px;
+  padding:10px 14px;text-align:center;min-width:120px;
   box-shadow:0 2px 8px rgba(0,0,0,0.08);
 }
 .readout-box .rval{
-  font-size:2.2rem;font-weight:800;
-  font-family:'Courier New',monospace;letter-spacing:2px;
+  font-size:1.8rem;font-weight:800;
+  font-family:'Courier New',monospace;letter-spacing:1px;
 }
-.readout-box .runit{font-size:0.95rem;color:var(--muted);margin-top:3px;}
+.readout-box .runit{font-size:0.85rem;color:var(--muted);margin-top:3px;}
 .station-divider{
   width:1px;background:var(--border);
-  align-self:stretch;margin:0 18px;
+  align-self:stretch;margin:0 12px;
   flex-shrink:0;
 }
 </style>
@@ -433,7 +433,7 @@ header p{font-size:1rem;color:#a5d6a7;margin-top:4px;}
               <div class="cylinder-label">🧪 量筒</div>
               <div class="cylinder-top"></div>
               <div class="cylinder-body drop-zone" id="cylinderZone">
-                <div class="cylinder-water" id="cylinderWater" style="height:50%;"></div>
+                <div class="cylinder-water" id="cylinderWater" style="height:33.3%;"></div>
                 <div class="cylinder-object" id="cylinderObj" style="display:none;"></div>
                 <div class="cylinder-scale">
                   <span>300</span><span>240</span><span>180</span><span>120</span><span>60</span><span>0</span>
@@ -677,9 +677,9 @@ header p{font-size:1rem;color:#a5d6a7;margin-top:4px;}
         <div class="station-row">
 
           <!-- Shelf -->
-          <div class="shelf-panel">
+          <div class="shelf-panel" style="min-width:320px;max-width:360px;">
             <div class="shelf-label">📦 未知物貨架<br><small style="font-size:0.8rem;font-weight:400;">拖曳到儀器</small></div>
-            <div class="shelf-items" id="unkShelfItems"></div>
+            <div id="unkShelfItems" style="display:grid;grid-template-columns:repeat(5,56px);gap:10px 8px;align-items:end;"></div>
           </div>
 
           <div class="station-divider"></div>
