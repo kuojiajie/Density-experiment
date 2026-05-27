@@ -214,6 +214,68 @@ header p{font-size:1rem;color:#a5d6a7;margin-top:4px;}
 }
 .reveal-btn:hover{background:rgba(102,187,106,0.35);}
 
+/* ── UNKNOWN PAGE ── */
+.setup-mode-btn{
+  padding:10px 20px;border-radius:10px;
+  border:2px solid var(--border);
+  background:var(--card);color:var(--muted);
+  cursor:pointer;font-size:1rem;font-weight:600;
+  transition:all .2s;
+}
+.setup-mode-btn:hover{border-color:var(--accent);color:var(--accent);}
+.setup-mode-btn.active{border-color:var(--accent);background:rgba(46,125,50,0.12);color:var(--accent);}
+
+.type-count-btn{
+  padding:8px 18px;border-radius:8px;
+  border:2px solid var(--border);
+  background:var(--card);color:var(--muted);
+  cursor:pointer;font-size:1rem;font-weight:600;
+  transition:all .2s;
+}
+.type-count-btn:hover{border-color:var(--accent);}
+.type-count-btn.active{border-color:var(--accent);background:rgba(46,125,50,0.15);color:var(--accent);}
+
+.action-btn{
+  padding:10px 24px;border-radius:10px;
+  border:none;background:var(--accent);
+  color:#fff;cursor:pointer;font-size:1rem;font-weight:700;
+  transition:all .2s;
+}
+.action-btn:hover{background:#1b5e20;}
+
+.cancel-btn{
+  padding:10px 24px;border-radius:10px;
+  border:2px solid var(--border);
+  background:var(--card);color:var(--muted);
+  cursor:pointer;font-size:1rem;font-weight:600;
+  transition:all .2s;
+}
+.cancel-btn:hover{border-color:var(--red);color:var(--red);}
+
+.manual-input-cell{
+  background:var(--panel);border-radius:10px;
+  padding:12px;text-align:center;
+}
+.manual-input-cell label{font-size:0.85rem;color:var(--muted);font-weight:700;display:block;margin-bottom:6px;}
+.manual-input-cell input{
+  width:90px;padding:8px;font-size:1rem;font-weight:700;
+  background:#f9fbe7;border:2px solid var(--border);
+  border-radius:8px;color:var(--text);text-align:center;outline:none;
+}
+.manual-input-cell input:focus{border-color:var(--accent);}
+
+.unk-checkbox-item{
+  padding:7px 14px;border-radius:8px;
+  border:2px solid var(--border);
+  background:var(--card);color:var(--muted);
+  cursor:pointer;font-size:0.95rem;font-weight:700;
+  transition:all .2s;user-select:none;
+}
+.unk-checkbox-item:hover{border-color:var(--accent);}
+.unk-checkbox-item.selected{border-color:var(--accent);background:rgba(46,125,50,0.12);color:var(--accent);}
+.unk-checkbox-item.correct{border-color:#2e7d32;background:rgba(46,125,50,0.2);color:#1b5e20;}
+.unk-checkbox-item.wrong{border-color:var(--red);background:rgba(198,40,40,0.1);color:var(--red);}
+
 /* ── LIQUID PAGE ── */
 .vol-btn{
   width:40px;height:40px;border-radius:8px;
@@ -308,6 +370,7 @@ header p{font-size:1rem;color:#a5d6a7;margin-top:4px;}
 <nav class="page-nav">
   <button class="page-tab active" onclick="switchPage('solid',this)">⚙️ 固體密度實驗</button>
   <button class="page-tab" onclick="switchPage('liquid',this)">💧 液體密度實驗</button>
+  <button class="page-tab" onclick="switchPage('unknown',this)">🔍 未知物密度實驗</button>
 </nav>
 
 <!-- ══════════════ SOLID PAGE ══════════════ -->
@@ -320,9 +383,13 @@ header p{font-size:1rem;color:#a5d6a7;margin-top:4px;}
     <div class="left-col">
 
       <div class="step-hint">
-        <span class="step-badge">1</span> 從貨架<b>拖曳</b>金屬塊到 <b>天平</b>，讀取 M 值並填入表格&nbsp;&nbsp;
-        <span class="step-badge">2</span> 將金屬塊拖曳到 <b>量筒</b>，觀察水位上升，讀取 V 值並填入表格&nbsp;&nbsp;
+        <span class="step-badge">1</span> 從貨架<b>拖曳</b>待測物到 <b>天平</b>，讀取 M 值並填入表格&nbsp;&nbsp;
+        <span class="step-badge">2</span> 將待測物拖曳到 <b>量筒</b>，觀察水位變化，讀取 V 值並填入表格&nbsp;&nbsp;
         <span class="step-badge">3</span> 自行計算 D = M / V，再按「顯示 D」按鈕驗證
+      </div>
+      <div id="woodFloatHint" style="display:none;background:rgba(56,189,248,0.1);border:1.5px solid #38bdf8;border-radius:10px;padding:12px 18px;font-size:0.95rem;color:#0369a1;line-height:1.8;">
+        🌊 <b>木頭是浮體！</b>量體積時需先將<b>鐵塊（重物）</b>和木塊一起放入量筒，使木塊沉入水中。
+        木塊體積 V = 水位上升量 − 鐵塊體積（10 cm³）
       </div>
 
               <!-- Station: shelf + instruments all in one row -->
@@ -369,7 +436,7 @@ header p{font-size:1rem;color:#a5d6a7;margin-top:4px;}
                 <div class="cylinder-water" id="cylinderWater" style="height:50%;"></div>
                 <div class="cylinder-object" id="cylinderObj" style="display:none;"></div>
                 <div class="cylinder-scale">
-                  <span>200</span><span>160</span><span>120</span><span>80</span><span>40</span><span>0</span>
+                  <span>300</span><span>240</span><span>180</span><span>120</span><span>60</span><span>0</span>
                 </div>
               </div>
             </div>
@@ -383,10 +450,11 @@ header p{font-size:1rem;color:#a5d6a7;margin-top:4px;}
 
         </div><!-- /station-row -->
 
-        <!-- Active item indicator -->
-        <div id="activeItemBar" style="margin-top:14px;padding:12px 18px;background:var(--panel);border-radius:10px;font-size:1rem;color:var(--muted);display:none;">
-          <b id="activeItemName" style="color:var(--text);font-size:1.05rem;"></b>&nbsp;&nbsp;已放上儀器，請記錄讀數後填入右側表格&nbsp;&nbsp;
-          <button style="padding:7px 18px;border-radius:8px;border:1.5px solid var(--border);background:none;color:var(--muted);cursor:pointer;font-size:0.95rem;" onclick="clearInstruments()">↺ 取回</button>
+        <!-- 天平/量筒狀態列 -->
+        <div id="activeItemBar" style="margin-top:12px;padding:10px 16px;background:var(--panel);border-radius:10px;font-size:0.95rem;color:var(--muted);display:none;">
+          <b id="activeItemName" style="color:var(--text);"></b>&nbsp;&nbsp;
+          <button style="padding:5px 14px;border-radius:7px;border:1.5px solid var(--border);background:none;color:var(--muted);cursor:pointer;font-size:0.85rem;" onclick="clearSolidBalance()">⚖️ 清空天平</button>
+          <button style="padding:5px 14px;border-radius:7px;border:1.5px solid var(--border);background:none;color:var(--muted);cursor:pointer;font-size:0.85rem;margin-left:6px;" onclick="clearSolidCylinder()">🧪 清空量筒</button>
         </div>
 
       </div><!-- /station -->
@@ -576,6 +644,169 @@ header p{font-size:1rem;color:#a5d6a7;margin-top:4px;}
   </div>
 </div>
 
+<!-- ══════════════ UNKNOWN PAGE ══════════════ -->
+<div id="page-unknown" class="page">
+
+  <!-- 主頁面 -->
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
+    <div class="step-hint" style="flex:1;">
+      <span class="step-badge">1</span> 選擇實驗液體，拖曳未知物到<b>天平</b>量質量（可同時放多個）&nbsp;&nbsp;
+      <span class="step-badge">2</span> 拖曳物體到<b>量筒</b>量體積，觀察浮沉現象&nbsp;&nbsp;
+      <span class="step-badge">3</span> 填入紀錄表，觀察散點圖找出同種物質&nbsp;&nbsp;
+      <span class="step-badge">4</span> 回答問題後對答案
+    </div>
+    <div style="display:flex;gap:10px;flex-shrink:0;">
+      <button class="setup-mode-btn" id="unkLiqWaterBtn" onclick="switchUnkLiquid('water')">💧 水</button>
+      <button class="setup-mode-btn" id="unkLiqOilBtn" onclick="switchUnkLiquid('oil')">🫙 食用油</button>
+      <button class="action-btn" onclick="rerollUnk()">🎲 重新出題</button>
+    </div>
+  </div>
+
+  <div class="solid-layout">
+    <div class="left-col">
+
+      <!-- 液體選擇器 -->
+      <div style="display:flex;align-items:center;gap:12px;">
+        <span style="font-size:0.9rem;color:var(--muted);font-weight:700;">實驗液體：</span>
+        <span id="unkLiqLabel" style="font-size:1rem;font-weight:700;color:var(--accent);">💧 水</span>
+      </div>
+
+      <!-- 實驗台 -->
+      <div class="station">
+        <div class="station-title">🔍 未知物實驗台</div>
+        <div class="station-row">
+
+          <!-- Shelf -->
+          <div class="shelf-panel">
+            <div class="shelf-label">📦 未知物貨架<br><small style="font-size:0.8rem;font-weight:400;">拖曳到儀器</small></div>
+            <div class="shelf-items" id="unkShelfItems"></div>
+          </div>
+
+          <div class="station-divider"></div>
+
+          <!-- Balance -->
+          <div class="instrument-panel">
+            <div class="instrument-visual">
+              <div class="balance-label">⚖️ 電子天平</div>
+              <div class="balance-body drop-zone" id="unkBalanceZone">
+                <div id="unkBalancePlate" class="balance-plate">
+                  <div id="unkBalanceItemDisplay" class="balance-item-on-plate"></div>
+                </div>
+                <div class="balance-stand"></div>
+                <div class="balance-base"></div>
+              </div>
+            </div>
+            <div class="instrument-readout">
+              <div class="readout-box">
+                <div class="rval" id="unkBalanceVal" style="color:var(--green);">0.00</div>
+                <div class="runit">公克 (g)</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="hint-arrow" style="padding:0 14px;align-self:center;font-size:1.6rem;">→</div>
+
+          <!-- Cylinder -->
+          <div class="instrument-panel">
+            <div class="instrument-visual">
+              <div class="cylinder-label">🧪 量筒</div>
+              <div class="cylinder-top"></div>
+              <div class="cylinder-body drop-zone" id="unkCylinderZone">
+                <div class="cylinder-water" id="unkCylinderWater" style="height:50%;"></div>
+                <div class="cylinder-object" id="unkCylinderObj" style="display:none;"></div>
+                <div class="cylinder-scale">
+                  <span>200</span><span>160</span><span>120</span><span>80</span><span>40</span><span>0</span>
+                </div>
+              </div>
+            </div>
+            <div class="instrument-readout">
+              <div class="readout-box">
+                <div class="rval" id="unkCylinderVal" style="color:var(--accent);">100</div>
+                <div class="runit">mL (cm³)</div>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /station-row -->
+
+          <!-- 天平上的物體清單 -->
+        <div id="unkBalanceItems" style="margin-top:12px;min-height:32px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;">
+          <span style="font-size:0.85rem;color:var(--muted);">天平上：</span>
+          <span id="unkBalanceItemTags" style="display:flex;gap:6px;flex-wrap:wrap;"></span>
+        </div>
+        <!-- 量筒裡的物體清單 -->
+        <div id="unkCylItems" style="margin-top:6px;min-height:32px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;">
+          <span style="font-size:0.85rem;color:var(--muted);">量筒中：</span>
+          <span id="unkCylItemTags" style="display:flex;gap:6px;flex-wrap:wrap;"></span>
+        </div>
+        <div style="margin-top:10px;display:flex;gap:10px;">
+          <button style="padding:7px 16px;border-radius:8px;border:1.5px solid var(--border);background:none;color:var(--muted);cursor:pointer;font-size:0.9rem;" onclick="clearUnkBalance()">⚖️ 清空天平</button>
+          <button style="padding:7px 16px;border-radius:8px;border:1.5px solid var(--border);background:none;color:var(--muted);cursor:pointer;font-size:0.9rem;" onclick="clearUnkCylinder()">🧪 清空量筒</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT -->
+    <div class="right-col">
+      <!-- 紀錄表 -->
+      <div class="card">
+        <div class="card-title">
+          實驗紀錄表
+          <button class="reset-btn" onclick="resetUnk()">↺ 重置</button>
+        </div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>未知物</th>
+              <th>質量 M (g)</th>
+              <th>體積 V (cm³)</th>
+              <th>密度 D (g/cm³)</th>
+            </tr>
+          </thead>
+          <tbody id="unkTableBody"></tbody>
+        </table>
+      </div>
+
+      <!-- 散點圖 -->
+      <div class="card">
+        <div class="card-title">質量對體積的關係圖</div>
+        <div style="margin-bottom:12px;">
+          <button class="trend-btn" id="unkTrendBtn" onclick="toggleUnkTrend()">📈 顯示趨勢線</button>
+        </div>
+        <div class="chart-wrap">
+          <canvas id="unkChart"></canvas>
+        </div>
+        <div style="margin-top:8px;font-size:0.82rem;color:var(--muted);">▸ 同一條線上的點代表同種物質&nbsp;&nbsp;▸ 趨勢線由系統自動分群，僅供參考</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 作答區 -->
+  <div class="card" style="margin-top:20px;" id="unkAnswerSection">
+    <div class="card-title">📝 作答</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
+      <!-- 浮沉判斷 -->
+      <div>
+        <p style="font-size:1rem;font-weight:700;color:var(--text);margin-bottom:12px;">在 <span id="unkLiqNameInQ">水</span> 中，哪些物體會<span style="color:#38bdf8;">漂浮</span>？</p>
+        <div id="unkFloatCheckboxes" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
+        <p style="font-size:1rem;font-weight:700;color:var(--text);margin:14px 0 12px;">哪些物體會<span style="color:#6b7280;">沉底</span>？</p>
+        <div id="unkSinkCheckboxes" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
+      </div>
+      <!-- 物質種數 -->
+      <div>
+        <p style="font-size:1rem;font-weight:700;color:var(--text);margin-bottom:12px;">九個未知物共有幾種不同物質？</p>
+        <div id="unkTypeCountBtns" style="display:flex;gap:8px;flex-wrap:wrap;"></div>
+      </div>
+    </div>
+    <div style="margin-top:20px;display:flex;gap:12px;">
+      <button class="action-btn" onclick="checkUnkAnswers()">🔍 對答案</button>
+      <button class="cancel-btn" onclick="resetUnkAnswers()">重新作答</button>
+    </div>
+    <div id="unkResult" style="margin-top:16px;display:none;"></div>
+  </div>
+
+</div>
+
 <!-- Ghost element for drag -->
 <div id="dragGhost">
   <div id="ghostBlock" class="metal-3d"></div>
@@ -589,6 +820,16 @@ header p{font-size:1rem;color:#a5d6a7;margin-top:4px;}
 //  DATA CONFIG
 // ═══════════════════════════════════════════
 const METALS = {
+  wood:{ name:'木頭', icon:'🪵', ref:0.50, color:'#a0785a', colorDark:'#6d4c2a',
+    floats:true, sinkerVol:10.0, sinkerMass:78.7,
+    specimens:[
+      {id:'wd1', label:'木塊 A', mass:15.0,  vol:30.0},
+      {id:'wd2', label:'木塊 B', mass:25.0,  vol:50.0},
+      {id:'wd3', label:'木塊 C', mass:40.0,  vol:80.0},
+      {id:'wd4', label:'木塊 D', mass:50.0,  vol:100.0},
+      {id:'wd5', label:'木塊 E', mass:75.0,  vol:150.0},
+    ]
+  },
   al:{ name:'鋁', icon:'🔘', ref:2.70,  color:'#c0c8d8', colorDark:'#8090a8',
     specimens:[
       {id:'al1', label:'鋁塊 A', mass:27.0,  vol:10.0},
@@ -651,8 +892,10 @@ const solidEntries = {};
   Object.keys(METALS).forEach(k=>{
   solidEntries[k] = METALS[k].specimens.map(()=>({m:'',v:'',revealed:false}));
 });
-const usedSpecimens = {}; // usedSpecimens[metalId] = Set of idx
+const usedSpecimens = {};
 Object.keys(METALS).forEach(k=>{ usedSpecimens[k] = new Set(); });
+let woodSinkerOnBalance  = false;
+let woodSinkerOnCylinder = false;
 
 // liquidEntries[liqId][idx] = {m:'', v:''}
 const liquidEntries = {};
@@ -669,7 +912,7 @@ let onBalanceIdx  = null;
 let onCylIdx      = null;
 
 // Trend line toggle state per metal
-const trendVisible = { al:false, fe:false, au:false };
+const trendVisible = { wood:false, al:false, fe:false, au:false };
 
 let solidChartInst  = null;
 let liquidChartInst = null;
@@ -688,6 +931,15 @@ function init(){
   setupDropZones();
   // Init liquid instruments after DOM ready
   setTimeout(renderLiquidInstruments, 100);
+  // Init unknown page
+  setTimeout(()=>{
+    generateUnkRandom();
+    buildUnkShelf();
+    renderUnkTable();
+    renderUnkChart();
+    buildUnkAnswerSection();
+    document.getElementById('unkLiqWaterBtn').classList.add('active');
+  }, 150);
 }
 
 // ═══════════════════════════════════════════
@@ -703,6 +955,11 @@ function switchPage(name, btn){
     if(name==='liquid'){
       buildLiquidPage();
       renderLiquidChart();
+    }
+    if(name==='unknown'){
+      buildUnkShelf();
+      renderUnkTable();
+      renderUnkChart();
     }
   },60);
 }
@@ -728,11 +985,17 @@ function selectMetal(k){
   currentMetal = k;
   document.querySelectorAll('.metal-tab').forEach(b=>b.classList.remove('active'));
   document.getElementById('mtab-'+k).classList.add('active');
+  solidBalanceObjects = new Set();
+  solidCylObjects = new Set();
+  woodSinkerOnBalance  = false;
+  woodSinkerOnCylinder = false;
   clearInstruments();
   buildShelf();
   renderSolidTable();
   buildTrendControls();
   renderSolidChart();
+  const hint = document.getElementById('woodFloatHint');
+  if(hint) hint.style.display = k==='wood' ? 'block' : 'none';
 }
 
 // ═══════════════════════════════════════════
@@ -742,7 +1005,20 @@ function buildShelf(){
   const wrap = document.getElementById('shelfItems');
   wrap.innerHTML = '';
   const mat = METALS[currentMetal];
-  const sizes = [28,34,40,50,60]; // visual sizes
+  const sizes = [28,34,40,50,60];
+
+  // 木頭實驗：顯示重物（鐵塊）
+  if(currentMetal === 'wood'){
+    const sinkerDiv = document.createElement('div');
+    sinkerDiv.className = 'metal-block';
+    sinkerDiv.innerHTML = `
+      <div class="metal-3d" style="width:28px;height:28px;background:linear-gradient(135deg,#6b7280,#374151);font-size:0.65rem;font-weight:800;">重</div>
+      <div class="metal-block-label">鐵塊</div>
+      <div class="metal-block-label" style="font-size:0.7rem;color:var(--accent);">重物</div>`;
+    sinkerDiv.addEventListener('mousedown', e=>startSinkerDrag(e));
+    sinkerDiv.addEventListener('click', ()=>dropSinkerOnBalance());
+    wrap.appendChild(sinkerDiv);
+  }
 
   mat.specimens.forEach((sp,i)=>{
     const used = usedSpecimens[currentMetal].has(i);
@@ -846,119 +1122,182 @@ function inRect(e, r){
   return e.clientX>=r.left && e.clientX<=r.right && e.clientY>=r.top && e.clientY<=r.bottom;
 }
 
-// Quick click to cycle through instruments
+// Quick click: 放天平
 function quickSelect(idx){
   if(usedSpecimens[currentMetal].has(idx)) return;
-  if(onBalanceIdx === null){
-    dropOnBalance(idx);
-  } else if(onCylIdx === null){
-    dropOnCylinder(idx);
-  }
+  dropOnBalance(idx);
 }
 
 // ═══════════════════════════════════════════
-//  DROP ON BALANCE
+//  SOLID BALANCE STATE（可放多個）
 // ═══════════════════════════════════════════
+let solidBalanceObjects = new Set(); // 目前在天平上的 specimen indices
+let solidCylObjects    = new Set(); // 目前在量筒裡的 specimen indices
+
+const WATER_BASE = 100;
+const CYL_MAX_VOL = 300;
+
+// ── 重物拖曳（木頭實驗）──
+let sinkerGhostActive = false;
+function startSinkerDrag(e){
+  e.preventDefault();
+  const ghost=document.getElementById('dragGhost');
+  const gBlock=document.getElementById('ghostBlock');
+  const gLabel=document.getElementById('ghostLabel');
+  gBlock.style.width='28px'; gBlock.style.height='28px';
+  gBlock.style.background='linear-gradient(135deg,#6b7280,#374151)';
+  gBlock.textContent='重'; gBlock.style.fontSize='0.7rem';
+  gLabel.textContent='鐵塊（重物）';
+  ghost.style.display='flex'; sinkerGhostActive=true;
+  moveGhost(e);
+  document.addEventListener('mousemove',onSinkerMove);
+  document.addEventListener('mouseup',onSinkerEnd);
+}
+function onSinkerMove(e){
+  if(!sinkerGhostActive) return; moveGhost(e);
+  const bz=document.getElementById('balanceZone');
+  const cz=document.getElementById('cylinderZone');
+  bz.classList.toggle('drag-over',inRect(e,bz.getBoundingClientRect()));
+  document.getElementById('balancePlate').classList.toggle('highlight',inRect(e,bz.getBoundingClientRect()));
+  cz.classList.toggle('drag-over',inRect(e,cz.getBoundingClientRect()));
+}
+function onSinkerEnd(e){
+  document.removeEventListener('mousemove',onSinkerMove);
+  document.removeEventListener('mouseup',onSinkerEnd);
+  sinkerGhostActive=false;
+  document.getElementById('dragGhost').style.display='none';
+  const bz=document.getElementById('balanceZone');
+  const cz=document.getElementById('cylinderZone');
+  bz.classList.remove('drag-over');
+  document.getElementById('balancePlate').classList.remove('highlight');
+  cz.classList.remove('drag-over');
+  if(inRect(e,bz.getBoundingClientRect())) dropSinkerOnBalance();
+  else if(inRect(e,cz.getBoundingClientRect())) dropSinkerOnCylinder();
+}
+function dropSinkerOnBalance(){
+  if(currentMetal!=='wood'){ showToast('鐵塊僅用於木頭實驗'); return; }
+  if(woodSinkerOnBalance){ showToast('鐵塊已在天平上'); return; }
+  woodSinkerOnBalance=true;
+  updateSolidBalanceDisplay();
+  showToast('鐵塊放上天平');
+}
+function dropSinkerOnCylinder(){
+  if(currentMetal!=='wood'){ showToast('鐵塊僅用於木頭實驗'); return; }
+  if(woodSinkerOnCylinder){ showToast('鐵塊已在量筒中'); return; }
+  woodSinkerOnCylinder=true;
+  updateSolidCylinderDisplay();
+  showToast('鐵塊放入量筒（+10 cm³）');
+}
+
 function dropOnBalance(idx){
   if(usedSpecimens[currentMetal].has(idx)) return;
-
-  const mat = METALS[currentMetal];
-  const sp  = mat.specimens[idx];
-
-  onBalanceIdx = idx;
-  balanceMass  = sp.mass;
-
-  // Update balance display
-  animateNumber('balanceVal', 0, sp.mass, 800, 2);
-
-  // Show item on plate
-  const plate = document.getElementById('balanceItemDisplay');
-  plate.innerHTML = `
-    <div class="metal-3d" style="width:28px;height:28px;background:linear-gradient(135deg,${mat.color},${mat.colorDark});font-size:0.7rem;">
-      ${mat.icon}
-    </div>`;
-
-  showActiveBar();
-  showToast(`${sp.label} 放上天平，請記錄讀數`);
+  if(solidBalanceObjects.has(idx)){
+    showToast(`${METALS[currentMetal].specimens[idx].label} 已在天平上`);
+    return;
+  }
+  solidBalanceObjects.add(idx);
+  updateSolidBalanceDisplay();
+  showToast(`${METALS[currentMetal].specimens[idx].label} 放上天平，請記錄讀數`);
 }
 
-// ═══════════════════════════════════════════
-//  DROP ON CYLINDER
-// ═══════════════════════════════════════════
-const WATER_BASE = 100; // mL baseline
+function updateSolidBalanceDisplay(){
+  const mat = METALS[currentMetal];
+  let total = 0;
+  solidBalanceObjects.forEach(i=>{ total += mat.specimens[i].mass; });
+  if(currentMetal==='wood' && woodSinkerOnBalance) total += mat.sinkerMass||78.7;
+  animateNumber('balanceVal', parseFloat(document.getElementById('balanceVal').textContent||'0'), total, 600, 2);
+
+  const plate = document.getElementById('balanceItemDisplay');
+  const items = [];
+  solidBalanceObjects.forEach(i=>{
+    items.push(`<div class="metal-3d" style="width:22px;height:22px;background:linear-gradient(135deg,${mat.color},${mat.colorDark});font-size:0.55rem;margin:1px;">${mat.icon}</div>`);
+  });
+  if(currentMetal==='wood' && woodSinkerOnBalance)
+    items.push(`<div class="metal-3d" style="width:22px;height:22px;background:linear-gradient(135deg,#6b7280,#374151);font-size:0.55rem;margin:1px;font-weight:800;">重</div>`);
+  plate.innerHTML = `<div style="display:flex;flex-wrap:wrap;justify-content:center;">${items.join('')}</div>`;
+
+  const bar = document.getElementById('activeItemBar');
+  const hasAny = solidBalanceObjects.size>0||solidCylObjects.size>0||woodSinkerOnBalance||woodSinkerOnCylinder;
+  if(!hasAny){ bar.style.display='none'; return; }
+  bar.style.display='flex'; bar.style.alignItems='center'; bar.style.gap='10px';
+  const bNames=[...solidBalanceObjects].map(i=>mat.specimens[i].label).join('、');
+  const cNames=[...solidCylObjects].map(i=>mat.specimens[i].label).join('、');
+  const bEx=(currentMetal==='wood'&&woodSinkerOnBalance)?' +鐵塊':'';
+  const cEx=(currentMetal==='wood'&&woodSinkerOnCylinder)?' +鐵塊':'';
+  document.getElementById('activeItemName').textContent=
+    (bNames||bEx?'天平：'+(bNames||'')+bEx:'')+(cNames||cEx?' ｜ 量筒：'+(cNames||'')+cEx:'');
+}
 
 function dropOnCylinder(idx){
   if(usedSpecimens[currentMetal].has(idx)) return;
+  if(solidCylObjects.has(idx)){
+    showToast(`${METALS[currentMetal].specimens[idx].label} 已在量筒中`);
+    return;
+  }
+  solidCylObjects.add(idx);
+  updateSolidCylinderDisplay();
+  showToast(`${METALS[currentMetal].specimens[idx].label} 放入量筒，水位上升`);
+}
 
+function updateSolidCylinderDisplay(){
   const mat = METALS[currentMetal];
-  const sp  = mat.specimens[idx];
+  const isWood = currentMetal==='wood';
+  let totalVol = WATER_BASE;
+  if(isWood && woodSinkerOnCylinder) totalVol += mat.sinkerVol||10;
+  solidCylObjects.forEach(i=>{
+    const sp = mat.specimens[i];
+    if(isWood){
+      if(woodSinkerOnCylinder) totalVol += sp.vol; // 重物拉沉，排開自身體積
+      else totalVol += sp.mass / 1.0; // 漂浮，排開等重量液體體積
+    } else {
+      totalVol += sp.vol;
+    }
+  });
+  const pct = Math.min((totalVol/CYL_MAX_VOL)*100, 95);
+  document.getElementById('cylinderWater').style.height = pct+'%';
+  animateNumber('cylinderVal', parseFloat(document.getElementById('cylinderVal').textContent||String(WATER_BASE)), totalVol, 600, 1);
 
-  // If nothing on balance yet, put on balance first
-  if(onBalanceIdx === null){ dropOnBalance(idx); return; }
-  // If different specimen already being measured
-  if(onBalanceIdx !== idx){ showToast('請先取回天平上的物體'); return; }
-
-  onCylIdx   = idx;
-  cylinderVol = sp.vol;
-
-  const totalVol = WATER_BASE + sp.vol;
-  const maxVol   = 200;
-  const pct      = (totalVol / maxVol) * 100;
-
-  // Animate water rise
-  const water = document.getElementById('cylinderWater');
-  const prevH = parseFloat(water.style.height||'50');
-  water.style.height = pct+'%';
-
-  // Show object inside cylinder
   const obj = document.getElementById('cylinderObj');
-  const sz  = Math.max(14, Math.min(30, 10 + sp.vol/4));
-  obj.style.display = 'flex';
-  obj.style.width   = sz+'px';
-  obj.style.height  = sz+'px';
-  obj.style.background = mat.color;
-  obj.textContent = mat.icon;
-  obj.style.fontSize = (sz*0.5)+'px';
-
-  animateNumber('cylinderVal', WATER_BASE, totalVol, 700, 1);
-
-  showActiveBar();
-  showToast(`放入量筒，水位上升，請記錄體積讀數`);
+  if(solidCylObjects.size===0 && !woodSinkerOnCylinder){ obj.style.display='none'; updateSolidBalanceDisplay(); return; }
+  const floats = isWood && !woodSinkerOnCylinder && solidCylObjects.size>0;
+  if(solidCylObjects.size>0){
+    const lastIdx=[...solidCylObjects].at(-1);
+    const sp=mat.specimens[lastIdx];
+    const sz=Math.max(14,Math.min(30,10+sp.vol/6));
+    obj.style.display='flex'; obj.style.width=sz+'px'; obj.style.height=sz+'px';
+    obj.style.background=mat.color; obj.textContent=mat.icon; obj.style.fontSize=(sz*0.45)+'px';
+    if(floats){
+      const wPct=parseFloat(document.getElementById('cylinderWater').style.height||'50');
+      obj.style.bottom='auto'; obj.style.top=(100-wPct-6)+'%';
+    } else {
+      obj.style.bottom='4px'; obj.style.top='auto';
+    }
+  } else { obj.style.display='none'; }
+  updateSolidBalanceDisplay();
 }
 
-// ═══════════════════════════════════════════
-//  ACTIVE BAR
-// ═══════════════════════════════════════════
-function showActiveBar(){
-  const bar = document.getElementById('activeItemBar');
-  const mat = METALS[currentMetal];
-  if(onBalanceIdx === null){ bar.style.display='none'; return; }
-  const sp = mat.specimens[onBalanceIdx];
-  bar.style.display = 'flex';
-  bar.style.alignItems = 'center';
-  bar.style.gap = '10px';
-  document.getElementById('activeItemName').textContent = sp.label;
+function clearSolidBalance(){
+  solidBalanceObjects.clear(); woodSinkerOnBalance=false;
+  updateSolidBalanceDisplay();
+  document.getElementById('balanceVal').textContent='0.00';
+  document.getElementById('balanceItemDisplay').innerHTML='';
 }
-
-// ═══════════════════════════════════════════
-//  RECORD CURRENT MEASUREMENT
-// ═══════════════════════════════════════════
-function recordCurrent(){
-  // 自動填入功能已移除，使用者自行手動填寫
+function clearSolidCylinder(){
+  solidCylObjects.clear(); woodSinkerOnCylinder=false;
+  document.getElementById('cylinderVal').textContent=String(WATER_BASE);
+  document.getElementById('cylinderWater').style.height=(WATER_BASE/CYL_MAX_VOL*100)+'%';
+  document.getElementById('cylinderObj').style.display='none';
+  updateSolidBalanceDisplay();
 }
-
-function clearInstruments(keepUsed=false){
-  onBalanceIdx = null;
-  onCylIdx     = null;
-  balanceMass  = null;
-  cylinderVol  = null;
-
-  document.getElementById('balanceVal').textContent = '0.00';
-  document.getElementById('balanceItemDisplay').innerHTML = '';
-  document.getElementById('cylinderVal').textContent = String(WATER_BASE);
-  document.getElementById('cylinderWater').style.height = (WATER_BASE/200*100)+'%'; // 100/200*100 = 50%
-  document.getElementById('cylinderObj').style.display = 'none';
-  document.getElementById('activeItemBar').style.display = 'none';
+function clearInstruments(){
+  solidBalanceObjects.clear(); solidCylObjects.clear();
+  woodSinkerOnBalance=false; woodSinkerOnCylinder=false;
+  document.getElementById('balanceVal').textContent='0.00';
+  document.getElementById('balanceItemDisplay').innerHTML='';
+  document.getElementById('cylinderVal').textContent=String(WATER_BASE);
+  document.getElementById('cylinderWater').style.height=(WATER_BASE/CYL_MAX_VOL*100)+'%';
+  document.getElementById('cylinderObj').style.display='none';
+  document.getElementById('activeItemBar').style.display='none';
 }
 
 // ═══════════════════════════════════════════
@@ -1032,13 +1371,12 @@ function renderSolidStats(){
 }
 
 function resetSolid(){
-  if(!confirm('確定清除目前金屬的所有紀錄？')) return;
+  if(!confirm('確定清除目前物質的所有紀錄？')) return;
   solidEntries[currentMetal] = METALS[currentMetal].specimens.map(()=>({m:'',v:'',revealed:false}));
   usedSpecimens[currentMetal] = new Set();
-  clearInstruments();
-  buildShelf();
-  renderSolidTable();
-  renderSolidChart();
+  solidBalanceObjects = new Set(); solidCylObjects = new Set();
+  woodSinkerOnBalance=false; woodSinkerOnCylinder=false;
+  clearInstruments(); buildShelf(); renderSolidTable(); renderSolidChart();
 }
 
 // ═══════════════════════════════════════════
@@ -1503,6 +1841,663 @@ function showToast(msg){
   t.textContent = msg; t.classList.add('show');
   clearTimeout(toastTimer);
   toastTimer = setTimeout(()=>t.classList.remove('show'), 2800);
+}
+
+// ═══════════════════════════════════════════
+//  UNKNOWN PAGE STATE
+// ═══════════════════════════════════════════
+const UNK_LABELS = ['A','B','C','D','E','F','G','H','I'];
+const UNK_BLOCK_COLOR = '#78909c';
+const UNK_BLOCK_DARK  = '#37474f';
+const SINKER_VOL  = 10;  // 重物體積 cm³
+const SINKER_MASS = 78.7; // 重物質量 g（鐵塊）
+const UNK_WATER_BASE = 100; // 量筒初始水位
+
+let unkLiquid    = 'water';
+let unkDensities = [];
+let unkVols      = [10,12,8,15,10,12,8,15,10];
+let unkMasses    = [];
+let unkEntries   = Array(9).fill(null).map(()=>({m:'',v:'',revealed:false}));
+let unkChartInst = null;
+let unkAnswerTypeCount = null;
+
+// 天平上的物體：Set of index（未知物）+ 是否有重物
+let unkBalanceObjects = new Set(); // 未知物 indices
+let unkBalanceHasSinker = false;
+// 量筒裡的物體
+let unkCylObjects = new Set();
+let unkCylHasSinker = false;
+
+const unkFloatSelected = new Set();
+const unkSinkSelected  = new Set();
+
+// ─── 隨機出題 ───
+function generateUnkRandom(){
+  const DENSITY_POOL = [0.50,0.70,0.85,1.05,1.20,1.50,2.00,2.70,5.00,7.87];
+  const liqD = unkLiquid==='water' ? 1.0 : 0.60;
+  const floatPool = DENSITY_POOL.filter(d=>d<liqD);
+  const sinkPool  = DENSITY_POOL.filter(d=>d>liqD);
+  const typeCount = 3 + Math.floor(Math.random()*3); // 3~5
+  const chosen = [];
+  if(floatPool.length) chosen.push(floatPool[Math.floor(Math.random()*floatPool.length)]);
+  if(sinkPool.length)  chosen.push(sinkPool[Math.floor(Math.random()*sinkPool.length)]);
+  while(chosen.length < typeCount){
+    const d = DENSITY_POOL[Math.floor(Math.random()*DENSITY_POOL.length)];
+    if(!chosen.includes(d)) chosen.push(d);
+  }
+
+  // 分配密度給9個物體，確保相同密度的物體體積不重複
+  // 先決定每種密度分配幾個物體
+  const assigned = [];
+  const typeAssign = Array(typeCount).fill(0);
+  for(let i=0;i<9;i++) typeAssign[i%typeCount]++;
+
+  // 可用體積池（不重複）
+  const VOL_POOL = [6,8,10,12,14,16,18,20,25];
+
+  chosen.forEach((density, ti)=>{
+    const count = typeAssign[ti];
+    // 從 VOL_POOL 隨機選不重複的 count 個體積
+    const shuffled = [...VOL_POOL].sort(()=>Math.random()-0.5);
+    for(let j=0;j<count;j++){
+      assigned.push({density, vol: shuffled[j]});
+    }
+  });
+
+  // 打亂順序
+  for(let i=assigned.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [assigned[i],assigned[j]]=[assigned[j],assigned[i]];
+  }
+
+  unkDensities = assigned.map(a=>a.density);
+  unkVols      = assigned.map(a=>a.vol);
+  unkMasses    = assigned.map(a=>+(a.density*a.vol).toFixed(2));
+}
+
+function rerollUnk(){
+  if(!confirm('重新出題將清除所有實驗紀錄，確定嗎？')) return;
+  generateUnkRandom();
+  resetUnkFull();
+  showToast('🎲 已重新出題！');
+}
+
+function switchUnkLiquid(id){
+  unkLiquid = id;
+  document.getElementById('unkLiqWaterBtn').classList.toggle('active', id==='water');
+  document.getElementById('unkLiqOilBtn').classList.toggle('active', id==='oil');
+  document.getElementById('unkLiqNameInQ').textContent = id==='water'?'水':'食用油';
+  // 更新量筒顏色
+  updateUnkCylinderColor();
+  // 重新計算水位
+  updateUnkCylinder();
+}
+
+function updateUnkCylinderColor(){
+  const cw = document.getElementById('unkCylinderWater');
+  if(!cw) return;
+  cw.style.background = unkLiquid==='oil'
+    ? 'linear-gradient(180deg,rgba(251,191,36,0.55),rgba(245,158,11,0.4))'
+    : 'linear-gradient(180deg,rgba(100,181,246,0.65),rgba(25,118,210,0.5))';
+}
+
+function resetUnkFull(){
+  unkEntries = Array(9).fill(null).map(()=>({m:'',v:'',revealed:false}));
+  unkBalanceObjects.clear(); unkBalanceHasSinker=false;
+  unkCylObjects.clear(); unkCylHasSinker=false;
+  unkFloatSelected.clear(); unkSinkSelected.clear();
+  unkAnswerTypeCount = null;
+  updateUnkBalanceDisplay();
+  updateUnkCylinder();
+  updateUnkItemTags();
+  buildUnkShelf();
+  renderUnkTable();
+  renderUnkChart();
+  buildUnkAnswerSection();
+  updateUnkCylinderColor();
+}
+
+// ─── Shelf（貨架永遠顯示，可重複拖曳）───
+function buildUnkShelf(){
+  const wrap = document.getElementById('unkShelfItems');
+  if(!wrap) return;
+  wrap.innerHTML = '';
+
+  // 重物（鐵塊）
+  const sinkerDiv = document.createElement('div');
+  sinkerDiv.className = 'metal-block';
+  sinkerDiv.innerHTML = `
+    <div class="metal-3d" style="width:30px;height:30px;background:linear-gradient(135deg,#6b7280,#374151);font-size:0.6rem;font-weight:800;">重</div>
+    <div class="metal-block-label">重物</div>`;
+  sinkerDiv.addEventListener('mousedown', e=>startUnkDrag(e,'sinker',30));
+  sinkerDiv.addEventListener('click', ()=>quickSelectUnk('sinker'));
+  wrap.appendChild(sinkerDiv);
+
+  // 九個未知物
+  UNK_LABELS.forEach((lb,i)=>{
+    const div = document.createElement('div');
+    div.className = 'metal-block';
+    const vol = unkVols[i] || 12;
+    const sz = Math.round(22 + (Math.min(vol,25)-6) / (25-6) * 22);
+    const fs = Math.max(9, Math.round(sz*0.38));
+    div.innerHTML = `
+      <div class="metal-3d" style="width:${sz}px;height:${sz}px;background:linear-gradient(135deg,${UNK_BLOCK_COLOR},${UNK_BLOCK_DARK});font-size:${fs}px;font-weight:800;">${lb}</div>
+      <div class="metal-block-label">物體 ${lb}</div>`;
+    div.addEventListener('mousedown', e=>startUnkDrag(e,i,sz));
+    div.addEventListener('click', ()=>quickSelectUnk(i));
+    wrap.appendChild(div);
+  });
+}
+
+// ─── Drag（idx 可以是數字或 'sinker'）───
+let unkDragIdx = null;
+let unkGhostActive = false;
+
+function startUnkDrag(e, idx, sz){
+  e.preventDefault();
+  unkDragIdx = idx;
+  const ghost  = document.getElementById('dragGhost');
+  const gBlock = document.getElementById('ghostBlock');
+  const gLabel = document.getElementById('ghostLabel');
+  const isSinker = idx==='sinker';
+  gBlock.style.width  = sz+'px';
+  gBlock.style.height = sz+'px';
+  gBlock.style.background = isSinker
+    ? 'linear-gradient(135deg,#6b7280,#374151)'
+    : `linear-gradient(135deg,${UNK_BLOCK_COLOR},${UNK_BLOCK_DARK})`;
+  gBlock.textContent = isSinker ? '重' : UNK_LABELS[idx];
+  gBlock.style.fontSize = '0.85rem';
+  gLabel.textContent = isSinker ? '重物' : '物體 '+UNK_LABELS[idx];
+  ghost.style.display = 'flex';
+  unkGhostActive = true;
+  moveGhost(e);
+  document.addEventListener('mousemove', onUnkDragMove);
+  document.addEventListener('mouseup',   onUnkDragEnd);
+}
+
+function onUnkDragMove(e){
+  if(!unkGhostActive) return;
+  moveGhost(e);
+  const bZone = document.getElementById('unkBalanceZone');
+  const cZone = document.getElementById('unkCylinderZone');
+  if(!bZone||!cZone) return;
+  bZone.classList.toggle('drag-over', inRect(e,bZone.getBoundingClientRect()));
+  document.getElementById('unkBalancePlate').classList.toggle('highlight', inRect(e,bZone.getBoundingClientRect()));
+  cZone.classList.toggle('drag-over', inRect(e,cZone.getBoundingClientRect()));
+}
+
+function onUnkDragEnd(e){
+  document.removeEventListener('mousemove', onUnkDragMove);
+  document.removeEventListener('mouseup',   onUnkDragEnd);
+  unkGhostActive = false;
+  document.getElementById('dragGhost').style.display = 'none';
+  const bZone = document.getElementById('unkBalanceZone');
+  const cZone = document.getElementById('unkCylinderZone');
+  if(!bZone||!cZone) return;
+  bZone.classList.remove('drag-over');
+  document.getElementById('unkBalancePlate').classList.remove('highlight');
+  cZone.classList.remove('drag-over');
+  if(inRect(e,bZone.getBoundingClientRect())) dropUnkOnBalance(unkDragIdx);
+  else if(inRect(e,cZone.getBoundingClientRect())) dropUnkOnCylinder(unkDragIdx);
+  unkDragIdx = null;
+}
+
+function quickSelectUnk(idx){
+  // 點擊：優先放天平，再放量筒
+  dropUnkOnBalance(idx);
+}
+
+// ─── 天平：支援多物體 ───
+function dropUnkOnBalance(idx){
+  if(unkMasses.length===0){ showToast('請先出題'); return; }
+  const isSinker = idx==='sinker';
+  if(isSinker){
+    if(unkBalanceHasSinker){ showToast('重物已在天平上'); return; }
+    unkBalanceHasSinker = true;
+  } else {
+    if(unkBalanceObjects.has(idx)){ showToast(`物體 ${UNK_LABELS[idx]} 已在天平上`); return; }
+    unkBalanceObjects.add(idx);
+  }
+  updateUnkBalanceDisplay();
+  updateUnkItemTags();
+  showToast(isSinker ? '重物放上天平' : `物體 ${UNK_LABELS[idx]} 放上天平`);
+}
+
+function updateUnkBalanceDisplay(){
+  let total = 0;
+  unkBalanceObjects.forEach(i=>{ total += unkMasses[i]||0; });
+  if(unkBalanceHasSinker) total += SINKER_MASS;
+  const prev = parseFloat(document.getElementById('unkBalanceVal')?.textContent||'0');
+  animateNumber('unkBalanceVal', prev, total, 600, 2);
+
+  // 更新秤盤上的圖示
+  const plate = document.getElementById('unkBalanceItemDisplay');
+  if(plate){
+    const items = [];
+    unkBalanceObjects.forEach(i=>items.push(`<div class="metal-3d" style="width:20px;height:20px;background:linear-gradient(135deg,${UNK_BLOCK_COLOR},${UNK_BLOCK_DARK});font-size:0.6rem;font-weight:800;margin:1px;">${UNK_LABELS[i]}</div>`));
+    if(unkBalanceHasSinker) items.push(`<div class="metal-3d" style="width:20px;height:20px;background:linear-gradient(135deg,#6b7280,#374151);font-size:0.55rem;font-weight:800;margin:1px;">重</div>`);
+    plate.innerHTML = `<div style="display:flex;flex-wrap:wrap;justify-content:center;">${items.join('')}</div>`;
+  }
+}
+
+function clearUnkBalance(){
+  unkBalanceObjects.clear();
+  unkBalanceHasSinker = false;
+  updateUnkBalanceDisplay();
+  updateUnkItemTags();
+}
+
+// ─── 量筒：支援多物體，正確浮沉 ───
+function dropUnkOnCylinder(idx){
+  if(unkMasses.length===0){ showToast('請先出題'); return; }
+  const isSinker = idx==='sinker';
+  if(isSinker){
+    if(unkCylHasSinker){ showToast('重物已在量筒中'); return; }
+    unkCylHasSinker = true;
+  } else {
+    if(unkCylObjects.has(idx)){ showToast(`物體 ${UNK_LABELS[idx]} 已在量筒中`); return; }
+    unkCylObjects.add(idx);
+  }
+  updateUnkCylinder();
+  updateUnkItemTags();
+  showToast(isSinker ? '重物放入量筒' : `物體 ${UNK_LABELS[idx]} 放入量筒`);
+}
+
+function updateUnkCylinder(){
+  const liqD = unkLiquid==='water' ? 1.0 : 0.60;
+  let totalSunkVol = 0; // 沉入（排水）的體積
+  let hasSinking = false;
+
+  // 重物：一定沉底
+  if(unkCylHasSinker){ totalSunkVol += SINKER_VOL; hasSinking=true; }
+
+  // 判斷每個未知物：沉 or 浮
+  // 若同時有重物綁著，一律沉底
+  unkCylObjects.forEach(i=>{
+    const d = unkDensities[i] || 1.0;
+    const v = unkVols[i];
+    if(d >= liqD || unkCylHasSinker){
+      // 沉底，排開自身體積
+      totalSunkVol += v;
+      hasSinking = true;
+    } else {
+      // 漂浮，排開等於自身重量的液體體積
+      const displacedVol = unkMasses[i] / liqD;
+      totalSunkVol += displacedVol;
+    }
+  });
+
+  const totalVol = UNK_WATER_BASE + totalSunkVol;
+  const maxVol = 200;
+  const pct = Math.min((totalVol/maxVol)*100, 95);
+
+  document.getElementById('unkCylinderWater').style.height = pct+'%';
+  const prev = parseFloat(document.getElementById('unkCylinderVal')?.textContent||String(UNK_WATER_BASE));
+  animateNumber('unkCylinderVal', prev, totalVol, 600, 1);
+
+  // 更新量筒內物體視覺
+  renderUnkCylObjects(liqD);
+}
+
+function renderUnkCylObjects(liqD){
+  const obj = document.getElementById('unkCylinderObj');
+  if(!obj) return;
+  if(unkCylObjects.size===0 && !unkCylHasSinker){ obj.style.display='none'; return; }
+
+  // 簡單顯示：沉底的在下，浮的在水面
+  const sunkItems = [], floatItems = [];
+  if(unkCylHasSinker) sunkItems.push('重');
+  unkCylObjects.forEach(i=>{
+    const d = unkDensities[i]||1.0;
+    if(d>=liqD||unkCylHasSinker) sunkItems.push(UNK_LABELS[i]);
+    else floatItems.push(UNK_LABELS[i]);
+  });
+
+  obj.style.display = 'flex';
+  obj.style.flexDirection = 'column';
+  obj.style.alignItems = 'center';
+  obj.style.width = '80%';
+  obj.style.height = 'auto';
+  obj.style.bottom = '4px';
+  obj.style.top = 'auto';
+  obj.style.background = 'none';
+  obj.style.fontSize = '0.7rem';
+  obj.innerHTML = [
+    ...sunkItems.map(lb=>`<div style="background:${lb==='重'?'#374151':UNK_BLOCK_COLOR};color:#fff;border-radius:4px;padding:2px 5px;margin:1px;font-weight:800;font-size:0.7rem;">${lb}</div>`),
+  ].join('');
+
+  // 漂浮物體用絕對定位在水面
+  // 先清除舊的漂浮視覺
+  document.querySelectorAll('.unk-float-obj').forEach(e=>e.remove());
+  const cyl = document.getElementById('unkCylinderZone');
+  const waterH = parseFloat(document.getElementById('unkCylinderWater').style.height||'50');
+  floatItems.forEach((lb,fi)=>{
+    const el = document.createElement('div');
+    el.className = 'unk-float-obj';
+    el.style.cssText = `position:absolute;left:${20+fi*22}px;bottom:${waterH*2.4-12}px;background:${UNK_BLOCK_COLOR};color:#fff;border-radius:4px;padding:2px 5px;font-weight:800;font-size:0.7rem;z-index:2;`;
+    el.textContent = lb;
+    cyl.appendChild(el);
+  });
+}
+
+function updateUnkItemTags(){
+  // 天平
+  const bTags = document.getElementById('unkBalanceItemTags');
+  if(bTags){
+    const items = [];
+    unkBalanceObjects.forEach(i=>items.push(`<span style="background:${UNK_BLOCK_COLOR};color:#fff;border-radius:6px;padding:3px 9px;font-size:0.85rem;font-weight:700;">物體 ${UNK_LABELS[i]}</span>`));
+    if(unkBalanceHasSinker) items.push(`<span style="background:#374151;color:#fff;border-radius:6px;padding:3px 9px;font-size:0.85rem;font-weight:700;">重物</span>`);
+    bTags.innerHTML = items.join('') || '<span style="color:var(--muted);font-size:0.85rem;">（空）</span>';
+  }
+  // 量筒
+  const cTags = document.getElementById('unkCylItemTags');
+  if(cTags){
+    const items = [];
+    unkCylObjects.forEach(i=>items.push(`<span style="background:${UNK_BLOCK_COLOR};color:#fff;border-radius:6px;padding:3px 9px;font-size:0.85rem;font-weight:700;">物體 ${UNK_LABELS[i]}</span>`));
+    if(unkCylHasSinker) items.push(`<span style="background:#374151;color:#fff;border-radius:6px;padding:3px 9px;font-size:0.85rem;font-weight:700;">重物</span>`);
+    cTags.innerHTML = items.join('') || '<span style="color:var(--muted);font-size:0.85rem;">（空）</span>';
+  }
+}
+
+function clearUnkBalance(){
+  unkBalanceObjects.clear();
+  unkBalanceHasSinker = false;
+  updateUnkBalanceDisplay();
+  updateUnkItemTags();
+}
+
+function clearUnkCylinder(){
+  unkCylObjects.clear();
+  unkCylHasSinker = false;
+  document.querySelectorAll('.unk-float-obj').forEach(e=>e.remove());
+  const obj = document.getElementById('unkCylinderObj'); if(obj) obj.style.display='none';
+  updateUnkCylinder();
+  updateUnkItemTags();
+}
+
+function clearUnkInstruments(){
+  clearUnkBalance();
+  clearUnkCylinder();
+}
+
+// ─── Table ───
+function renderUnkTable(){
+  const tbody = document.getElementById('unkTableBody');
+  if(!tbody) return;
+  tbody.innerHTML = UNK_LABELS.map((lb,i)=>{
+    const d = unkEntries[i];
+    const hasData = d.m!==''&&d.v!==''&&+d.v>0;
+    const rho = hasData ? (+d.m/+d.v).toFixed(4) : null;
+    const mOk = d.m!==''?'ok':'';
+    const vOk = d.v!==''?'ok':'';
+    return `<tr>
+      <td><span class="sp-name">物體 ${lb}</span></td>
+      <td><input class="d-input ${mOk}" type="text" inputmode="decimal" placeholder="—" value="${d.m}" onchange="onUnkInput(${i},'m',this)"></td>
+      <td><input class="d-input ${vOk}" type="text" inputmode="decimal" placeholder="—" value="${d.v}" onchange="onUnkInput(${i},'v',this)"></td>
+      <td>${hasData&&d.revealed?`<span class="rho-cell">${rho}</span>`:hasData?`<button class="reveal-btn" onclick="revealUnk(${i})">顯示 D</button>`:`<span class="rho-empty">—</span>`}</td>
+    </tr>`;
+  }).join('');
+}
+
+function onUnkInput(idx, field, el){
+  const val = el.value.trim();
+  const num = parseFloat(val);
+  if(val!==''&&(isNaN(num)||num<0)){ el.style.borderColor='var(--red)'; return; }
+  unkEntries[idx][field] = val;
+  unkEntries[idx].revealed = false;
+  el.classList.toggle('ok', val!=='');
+  el.style.borderColor='';
+  renderUnkTable();
+  renderUnkChart();
+}
+
+function revealUnk(idx){
+  unkEntries[idx].revealed = true;
+  renderUnkTable();
+}
+
+function resetUnk(){
+  if(!confirm('確定清除所有量測紀錄？')) return;
+  unkEntries = Array(9).fill(null).map(()=>({m:'',v:'',revealed:false}));
+  clearUnkInstruments();
+  renderUnkTable();
+  renderUnkChart();
+}
+
+// ─── Chart ───
+const UNK_POINT_COLORS = [
+  '#e53935','#8e24aa','#1e88e5','#00897b','#f4511e',
+  '#6d4c41','#3949ab','#039be5','#43a047','#fdd835'
+];
+// 趨勢線顏色（與點顏色對應，稍深）
+const UNK_TREND_COLORS = [
+  '#b71c1c','#4a148c','#0d47a1','#004d40','#bf360c',
+  '#3e2723','#1a237e','#01579b','#1b5e20','#f9a825'
+];
+
+// ─── 自動分群（依斜率精確聚類，容差 5%）───
+function autoGroupBySlope(pts){
+  if(pts.length===0) return [];
+  const TOLERANCE = 0.05; // 斜率差異在 5% 以內視為同一群
+
+  // 計算每個點的密度（斜率）
+  const slopes = pts.map(p=>p.y/p.x);
+
+  // 貪婪分群：斜率相近（差距 < tolerance * 平均值）的點歸為同一群
+  const groups = []; // [{center, indices:[]}]
+  slopes.forEach((s,i)=>{
+    // 找已有群中最近的
+    let matched = -1;
+    let minDiff = Infinity;
+    groups.forEach((g,gi)=>{
+      const diff = Math.abs(s - g.center) / g.center;
+      if(diff < TOLERANCE && diff < minDiff){
+        minDiff = diff;
+        matched = gi;
+      }
+    });
+    if(matched >= 0){
+      groups[matched].indices.push(i);
+      // 更新群中心為平均斜率
+      const idxs = groups[matched].indices;
+      groups[matched].center = idxs.reduce((sum,j)=>sum+slopes[j],0)/idxs.length;
+    } else {
+      groups.push({center:s, indices:[i]});
+    }
+  });
+  return groups.map(g=>g.indices);
+}
+
+let unkShowTrend = false;
+
+function toggleUnkTrend(){
+  unkShowTrend = !unkShowTrend;
+  const btn = document.getElementById('unkTrendBtn');
+  if(btn){
+    btn.classList.toggle('active', unkShowTrend);
+    btn.textContent = unkShowTrend ? '📈 隱藏趨勢線' : '📈 顯示趨勢線';
+  }
+  renderUnkChart();
+}
+
+function renderUnkChart(){
+  const ctx = document.getElementById('unkChart');
+  if(!ctx) return;
+  if(unkChartInst) unkChartInst.destroy();
+
+  const pts = unkEntries.map((d,i)=>{
+    if(d.m===''||d.v===''||+d.v<=0) return null;
+    return {x:+d.v, y:+d.m, idx:i};
+  }).filter(Boolean);
+
+  const noData = pts.length===0;
+  const datasets = [];
+
+  if(!noData){
+    // 散點：每個物體一個顏色
+    pts.forEach(p=>{
+      datasets.push({
+        label: '物體 '+UNK_LABELS[p.idx],
+        data:[{x:p.x,y:p.y}],
+        type:'scatter',
+        backgroundColor: UNK_POINT_COLORS[p.idx]+'cc',
+        borderColor: UNK_POINT_COLORS[p.idx],
+        pointRadius:12, pointHoverRadius:15,
+        order:2,
+      });
+    });
+
+    // 趨勢線（自動分群）
+    if(unkShowTrend && pts.length >= 2){
+      const groups = autoGroupBySlope(pts);
+      const maxV = Math.max(...pts.map(p=>p.x))*1.2;
+
+      groups.forEach((grpIndices, gi)=>{
+        const grpPts = grpIndices.map(i=>pts[i]);
+        // 斜率：過原點的最小二乘
+        const slope = grpPts.reduce((s,p)=>s+p.x*p.y,0) /
+                      grpPts.reduce((s,p)=>s+p.x*p.x,0);
+        const col = UNK_TREND_COLORS[gi % UNK_TREND_COLORS.length];
+        const members = grpIndices.map(i=>'物體 '+UNK_LABELS[pts[i].idx]).join('、');
+        datasets.push({
+          label: `群組 ${gi+1}（${members}）D≈${slope.toFixed(3)}`,
+          data:[{x:0,y:0},{x:maxV,y:slope*maxV}],
+          type:'line',
+          borderColor: col,
+          borderWidth: 2.5,
+          pointRadius: 0,
+          fill: false,
+          order: 1,
+        });
+      });
+    }
+  }
+
+  unkChartInst = new Chart(ctx.getContext('2d'),{
+    type:'scatter',
+    data:{ datasets: noData?[]:datasets },
+    plugins: noData?[emptyTextPlugin('請量測後填入數據')]:[],
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{
+        legend:{
+          display:!noData,
+          labels:{
+            color:'#1b2e1b',boxWidth:14,font:{size:13,weight:'600'},
+            filter: item=>!item.text.startsWith('群組') || unkShowTrend
+          }
+        },
+        tooltip:{callbacks:{label:c=>{
+          if(c.raw&&c.raw.x!==undefined){
+            const r=(c.raw.y/c.raw.x).toFixed(4);
+            return `${c.dataset.label}  V=${c.raw.x} cm³, M=${c.raw.y} g, D≈${r}`;
+          }
+          return c.dataset.label;
+        }},bodyFont:{size:13}}
+      },
+      scales:{
+        x:{title:{display:true,text:'體積 V (cm³)',color:'#2e7d32',font:{size:14,weight:'600'}},ticks:{color:'#2e7d32',font:{size:13}},grid:{color:'rgba(165,214,167,0.5)'},beginAtZero:true},
+        y:{title:{display:true,text:'質量 M (g)',color:'#2e7d32',font:{size:14,weight:'600'}},ticks:{color:'#2e7d32',font:{size:13}},grid:{color:'rgba(165,214,167,0.5)'},beginAtZero:true},
+      }
+    }
+  });
+}
+
+// ─── Answer Section ───
+function buildUnkAnswerSection(){
+  // 浮沉勾選
+  ['unkFloatCheckboxes','unkSinkCheckboxes'].forEach(id=>{
+    const wrap = document.getElementById(id);
+    if(!wrap) return;
+    wrap.innerHTML = UNK_LABELS.map(lb=>
+      `<span class="unk-checkbox-item" onclick="toggleUnkCheck(this,'${lb}','${id}')">${lb}</span>`
+    ).join('');
+  });
+  unkFloatSelected.clear();
+  unkSinkSelected.clear();
+
+  // 種數按鈕 1~5
+  const wrap = document.getElementById('unkTypeCountBtns');
+  if(wrap) wrap.innerHTML = [1,2,3,4,5].map(n=>
+    `<button class="type-count-btn" onclick="selectUnkTypeCount(${n},this)">${n} 種</button>`
+  ).join('');
+  unkAnswerTypeCount = null;
+
+  const res = document.getElementById('unkResult');
+  if(res) res.style.display='none';
+}
+
+function toggleUnkCheck(el, lb, groupId){
+  const set = groupId==='unkFloatCheckboxes' ? unkFloatSelected : unkSinkSelected;
+  if(set.has(lb)){ set.delete(lb); el.classList.remove('selected'); }
+  else { set.add(lb); el.classList.add('selected'); }
+}
+
+function selectUnkTypeCount(n, btn){
+  unkAnswerTypeCount = n;
+  document.querySelectorAll('#unkTypeCountBtns .type-count-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function checkUnkAnswers(){
+  if(unkMasses.length===0){ showToast('請先完成出題設定'); return; }
+  const liqDensity = unkLiquid==='water' ? 1.0 : 0.60;
+
+  // 計算正確答案
+  const correctFloat = new Set(UNK_LABELS.filter((_,i)=>unkDensities[i]<liqDensity));
+  const correctSink  = new Set(UNK_LABELS.filter((_,i)=>unkDensities[i]>liqDensity));
+  const correctTypes = new Set(unkDensities).size;
+
+  // 標記浮的答案
+  document.querySelectorAll('#unkFloatCheckboxes .unk-checkbox-item').forEach(el=>{
+    const lb = el.textContent;
+    const sel = unkFloatSelected.has(lb);
+    const cor = correctFloat.has(lb);
+    el.classList.remove('selected','correct','wrong');
+    if(sel&&cor) el.classList.add('correct');
+    else if(sel&&!cor) el.classList.add('wrong');
+    else if(!sel&&cor) el.classList.add('correct'); // 漏選也標出
+  });
+
+  // 標記沉的答案
+  document.querySelectorAll('#unkSinkCheckboxes .unk-checkbox-item').forEach(el=>{
+    const lb = el.textContent;
+    const sel = unkSinkSelected.has(lb);
+    const cor = correctSink.has(lb);
+    el.classList.remove('selected','correct','wrong');
+    if(sel&&cor) el.classList.add('correct');
+    else if(sel&&!cor) el.classList.add('wrong');
+    else if(!sel&&cor) el.classList.add('correct');
+  });
+
+  // 結果顯示
+  const floatOk = [...correctFloat].every(lb=>unkFloatSelected.has(lb)) && unkFloatSelected.size===correctFloat.size;
+  const sinkOk  = [...correctSink].every(lb=>unkSinkSelected.has(lb))  && unkSinkSelected.size===correctSink.size;
+  const typeOk  = unkAnswerTypeCount===correctTypes;
+
+  const res = document.getElementById('unkResult');
+  res.style.display = 'block';
+  res.innerHTML = `
+    <div style="background:var(--panel);border-radius:12px;padding:18px 22px;">
+      <div style="font-size:1.1rem;font-weight:700;margin-bottom:12px;">
+        ${(floatOk&&sinkOk&&typeOk)?'🎉 全部正確！':'📋 答案解析'}
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;font-size:0.95rem;">
+        <div>漂浮物體：${correctFloat.size>0?[...correctFloat].map(l=>'物體 '+l).join('、'):'（無）'}
+          ${floatOk?'✅':'❌'}</div>
+        <div>沉底物體：${correctSink.size>0?[...correctSink].map(l=>'物體 '+l).join('、'):'（無）'}
+          ${sinkOk?'✅':'❌'}</div>
+        <div>物質種數：共 <b>${correctTypes}</b> 種
+          ${typeOk?'✅':'❌（你回答了 '+(unkAnswerTypeCount||'未選')+'）'}</div>
+        <div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border);font-size:0.88rem;color:var(--muted);">
+          ${unkDensities.map((d,i)=>`物體 ${UNK_LABELS[i]}：${d} g/cm³`).join('　')}
+        </div>
+      </div>
+    </div>`;
+}
+
+function resetUnkAnswers(){
+  buildUnkAnswerSection();
 }
 
 // ── START ──
