@@ -2197,14 +2197,17 @@ function renderUnkCylObjects(liqD){
   ].join('');
 
   // 漂浮物體用絕對定位在水面
-  // 先清除舊的漂浮視覺
   document.querySelectorAll('.unk-float-obj').forEach(e=>e.remove());
   const cyl = document.getElementById('unkCylinderZone');
+  const cylHeight = cyl.offsetHeight || 200;
   const waterH = parseFloat(document.getElementById('unkCylinderWater').style.height||'50');
+  // waterH 是百分比，換算成 px 後就是水面距離底部的高度
+  const waterPx = cylHeight * waterH / 100;
   floatItems.forEach((lb,fi)=>{
     const el = document.createElement('div');
     el.className = 'unk-float-obj';
-    el.style.cssText = `position:absolute;left:${20+fi*22}px;bottom:${waterH*2.4-12}px;background:${UNK_BLOCK_COLOR};color:#fff;border-radius:4px;padding:2px 5px;font-weight:800;font-size:0.7rem;z-index:2;`;
+    // bottom = 水面高度（px），讓物體底部剛好在水面上
+    el.style.cssText = `position:absolute;left:${10+fi*26}px;bottom:${Math.max(0,waterPx-2)}px;background:${UNK_BLOCK_COLOR};color:#fff;border-radius:4px;padding:2px 5px;font-weight:800;font-size:0.7rem;z-index:2;`;
     el.textContent = lb;
     cyl.appendChild(el);
   });
