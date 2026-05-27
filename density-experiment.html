@@ -488,7 +488,7 @@ header p{font-size:1rem;color:#a5d6a7;margin-top:4px;}
           <canvas id="solidChart"></canvas>
         </div>
         <div style="margin-top:10px;font-size:0.78rem;color:var(--muted);line-height:1.8;">
-          ▸ 按上方按鈕可加入各物質趨勢線，斜率 = D&nbsp;&nbsp;▸ 虛線為標準值
+          ▸ 按上方按鈕可畫出各物質的作圖線，斜率 = D&nbsp;&nbsp;▸ 虛線為理論值
         </div>
       </div>
     </div>
@@ -637,7 +637,7 @@ header p{font-size:1rem;color:#a5d6a7;margin-top:4px;}
           <canvas id="liquidChart"></canvas>
         </div>
         <div style="margin-top:10px;font-size:0.85rem;color:var(--muted);line-height:1.8;">
-          ▸ 按上方按鈕可加入趨勢線，斜率 = D&nbsp;&nbsp;▸ 虛線為標準值
+          ▸ 按上方按鈕可畫出作圖線，斜率 = D&nbsp;&nbsp;▸ 虛線為理論值
         </div>
       </div>
     </div>
@@ -771,12 +771,12 @@ header p{font-size:1rem;color:#a5d6a7;margin-top:4px;}
       <div class="card">
         <div class="card-title">質量對體積的關係圖</div>
         <div style="margin-bottom:12px;">
-          <button class="trend-btn" id="unkTrendBtn" onclick="toggleUnkTrend()">📈 顯示趨勢線</button>
+          <button class="trend-btn" id="unkTrendBtn" onclick="toggleUnkTrend()">📈 顯示作圖線</button>
         </div>
         <div class="chart-wrap">
           <canvas id="unkChart"></canvas>
         </div>
-        <div style="margin-top:8px;font-size:0.82rem;color:var(--muted);">▸ 同一條線上的點代表同種物質&nbsp;&nbsp;▸ 趨勢線由系統自動分群，僅供參考</div>
+        <div style="margin-top:8px;font-size:0.82rem;color:var(--muted);">▸ 同一條作圖線上的點代表同種物質&nbsp;&nbsp;▸ 作圖線由系統自動分群，僅供參考</div>
       </div>
     </div>
   </div>
@@ -820,16 +820,6 @@ header p{font-size:1rem;color:#a5d6a7;margin-top:4px;}
 //  DATA CONFIG
 // ═══════════════════════════════════════════
 const METALS = {
-  wood:{ name:'木頭', icon:'🪵', ref:0.50, color:'#a0785a', colorDark:'#6d4c2a',
-    floats:true, sinkerVol:10.0, sinkerMass:78.7,
-    specimens:[
-      {id:'wd1', label:'木塊 A', mass:15.0,  vol:30.0},
-      {id:'wd2', label:'木塊 B', mass:25.0,  vol:50.0},
-      {id:'wd3', label:'木塊 C', mass:40.0,  vol:80.0},
-      {id:'wd4', label:'木塊 D', mass:50.0,  vol:100.0},
-      {id:'wd5', label:'木塊 E', mass:75.0,  vol:150.0},
-    ]
-  },
   al:{ name:'鋁', icon:'🔘', ref:2.70,  color:'#c0c8d8', colorDark:'#8090a8',
     specimens:[
       {id:'al1', label:'鋁塊 A', mass:27.0,  vol:10.0},
@@ -857,28 +847,34 @@ const METALS = {
       {id:'au5', label:'金塊 E', mass:965.0, vol:50.0},
     ]
   },
+  wood:{ name:'木頭', icon:'🪵', ref:0.50, color:'#a0785a', colorDark:'#6d4c2a',
+    floats:true, sinkerVol:10.0, sinkerMass:78.7,
+    specimens:[
+      {id:'wd1', label:'木塊 A', mass:15.0,  vol:30.0},
+      {id:'wd2', label:'木塊 B', mass:25.0,  vol:50.0},
+      {id:'wd3', label:'木塊 C', mass:40.0,  vol:80.0},
+      {id:'wd4', label:'木塊 D', mass:50.0,  vol:100.0},
+      {id:'wd5', label:'木塊 E', mass:75.0,  vol:150.0},
+    ]
+  },
 };
 
 const LIQUIDS = [
-  { id:'water', name:'水',     icon:'💧', ref:1.000, color:'#38bdf8', colorDark:'#0284c7',
+  { id:'water', name:'水', icon:'💧', ref:1.000, color:'#38bdf8', colorDark:'#0284c7',
     liquidColor:'rgba(56,189,248,0.4)',
-    specimens:[
-      {mass:25.0,  vol:25},
-      {mass:50.0,  vol:50},
-      {mass:75.0,  vol:75},
-      {mass:100.0, vol:100},
-      {mass:150.0, vol:150},
-    ]
+    specimens:[{mass:25.0,vol:25},{mass:50.0,vol:50},{mass:75.0,vol:75},{mass:100.0,vol:100},{mass:150.0,vol:150}]
   },
-  { id:'oil',   name:'食用油', icon:'🫙', ref:0.60,  color:'#fbbf24', colorDark:'#d97706',
+  { id:'oil', name:'食用油', icon:'🫙', ref:0.60, color:'#fbbf24', colorDark:'#d97706',
     liquidColor:'rgba(251,191,36,0.4)',
-    specimens:[
-      {mass:15.0,  vol:25},
-      {mass:30.0,  vol:50},
-      {mass:45.0,  vol:75},
-      {mass:60.0,  vol:100},
-      {mass:90.0,  vol:150},
-    ]
+    specimens:[{mass:15.0,vol:25},{mass:30.0,vol:50},{mass:45.0,vol:75},{mass:60.0,vol:100},{mass:90.0,vol:150}]
+  },
+  { id:'alcohol', name:'酒精', icon:'🍶', ref:0.80, color:'#a78bfa', colorDark:'#7c3aed',
+    liquidColor:'rgba(167,139,250,0.4)',
+    specimens:[{mass:20.0,vol:25},{mass:40.0,vol:50},{mass:60.0,vol:75},{mass:80.0,vol:100},{mass:120.0,vol:150}]
+  },
+  { id:'mercury', name:'水銀', icon:'⚗️', ref:13.6, color:'#94a3b8', colorDark:'#475569',
+    liquidColor:'rgba(148,163,184,0.6)',
+    specimens:[{mass:340.0,vol:25},{mass:680.0,vol:50},{mass:1020.0,vol:75},{mass:1360.0,vol:100},{mass:2040.0,vol:150}]
   },
 ];
 
@@ -912,7 +908,7 @@ let onBalanceIdx  = null;
 let onCylIdx      = null;
 
 // Trend line toggle state per metal
-const trendVisible = { wood:false, al:false, fe:false, au:false };
+const trendVisible = { al:false, fe:false, au:false, wood:false };
 
 let solidChartInst  = null;
 let liquidChartInst = null;
@@ -1406,6 +1402,7 @@ function resetSolid(){
   usedSpecimens[currentMetal] = new Set();
   solidBalanceObjects = new Set(); solidCylObjects = new Set();
   woodSinkerOnBalance=false; woodSinkerOnCylinder=false;
+  document.querySelectorAll('.solid-float-obj, .solid-sinker-obj').forEach(e=>e.remove());
   clearInstruments(); buildShelf(); renderSolidTable(); renderSolidChart();
 }
 
@@ -1424,8 +1421,7 @@ function buildTrendControls(){
     btn.style.borderColor = isOn ? mat.color : '';
     btn.style.backgroundColor = isOn ? mat.color+'33' : '';
     btn.style.color = isOn ? mat.color : '';
-    btn.innerHTML = `<span style="width:12px;height:12px;border-radius:50%;background:${mat.color};display:inline-block;"></span>
-      ${mat.name} 趨勢線`;
+          btn.innerHTML = `<span style="width:12px;height:12px;border-radius:50%;background:${mat.color};display:inline-block;"></span> ${mat.name} 作圖`;
     btn.onclick = ()=>toggleTrend(k);
     wrap.appendChild(btn);
   });
@@ -1465,7 +1461,7 @@ function renderSolidChart(){
       type:'scatter',
       backgroundColor: col+'cc',
       borderColor: col,
-      pointRadius:10, pointHoverRadius:13,
+      pointRadius:7, pointHoverRadius:10,
       order:2,
     });
 
@@ -1473,17 +1469,16 @@ function renderSolidChart(){
     const slope = rhos.reduce((a,b)=>a+b,0)/rhos.length;
     const maxV  = Math.max(...pts.map(p=>p.x))*1.2;
 
-    // Trend line — only if toggled on
     if(trendVisible[k]){
       datasets.push({
-        label: mat.name+' 趨勢線 D≈'+slope.toFixed(3)+' g/cm³',
+        label: mat.name+' 作圖線 D≈'+slope.toFixed(3),
         data:[{x:0,y:0},{x:maxV,y:slope*maxV}],
         type:'line', borderColor:col, borderWidth:2.5,
         pointRadius:0, fill:false, order:1,
       });
       // Std reference dashed
       datasets.push({
-        label: mat.name+' 標準值 D='+mat.ref,
+        label: mat.name+' 理論值 D='+mat.ref,
         data:[{x:0,y:0},{x:maxV,y:mat.ref*maxV}],
         type:'line', borderColor:col+'55', borderWidth:1.5,
         borderDash:[3,6], pointRadius:0, fill:false, order:1,
@@ -1503,7 +1498,7 @@ function renderSolidChart(){
         legend:{
           display:!noData,
           labels:{color:'#1b2e1b',boxWidth:16,font:{size:15,weight:'600'},
-            filter:item=>!item.text.includes('標準值')
+            filter:item=>!item.text.includes('理論值')
           }
         },
         tooltip:{callbacks:{label:c=>{
@@ -1535,7 +1530,7 @@ const LIQ_MAX_VOL = 100;
 // liquidEntries2[liqId][idx] = {m:'', v:'', revealed:false}
 const liquidEntries2 = {};
 LIQUIDS.forEach(l=>{ liquidEntries2[l.id] = Array.from({length:5},()=>({m:'',v:'',revealed:false})); });
-const liqTrendVisible = { water:false, oil:false };
+const liqTrendVisible = { water:false, oil:false, alcohol:false, mercury:false };
 
 function buildLiquidPage(){
   buildLiquidTabs();
@@ -1737,7 +1732,7 @@ function buildLiqTrendControls(){
     btn.style.borderColor = isOn ? liq.color : '';
     btn.style.backgroundColor = isOn ? liq.color+'33' : '';
     btn.style.color = isOn ? liq.color : '';
-    btn.innerHTML = `<span style="width:12px;height:12px;border-radius:50%;background:${liq.color};display:inline-block;"></span> ${liq.name} 趨勢線`;
+    btn.innerHTML = `<span style="width:12px;height:12px;border-radius:50%;background:${liq.color};display:inline-block;"></span> ${liq.name} 作圖`;
     btn.onclick = ()=>{ liqTrendVisible[liq.id]=!liqTrendVisible[liq.id]; buildLiqTrendControls(); renderLiquidChart(); };
     wrap.appendChild(btn);
   });
@@ -1763,7 +1758,7 @@ function renderLiquidChart(){
       type:'scatter',
       backgroundColor: liq.color+'cc',
       borderColor: liq.color,
-      pointRadius:10, pointHoverRadius:13, order:2,
+      pointRadius:7, pointHoverRadius:10, order:2,
     });
 
     const rhos  = pts.map(p=>p.y/p.x);
@@ -1772,13 +1767,13 @@ function renderLiquidChart(){
 
     if(liqTrendVisible[liq.id]){
       datasets.push({
-        label: liq.name+' 趨勢線 D≈'+slope.toFixed(4)+' g/cm³',
+        label: liq.name+' 作圖線 D≈'+slope.toFixed(4),
         data:[{x:0,y:0},{x:maxV,y:slope*maxV}],
         type:'line', borderColor:liq.color, borderWidth:2.5,
         pointRadius:0, fill:false, order:1,
       });
       datasets.push({
-        label: liq.name+' 標準值 D='+liq.ref,
+        label: liq.name+' 理論值 D='+liq.ref,
         data:[{x:0,y:0},{x:maxV,y:liq.ref*maxV}],
         type:'line', borderColor:liq.color+'55', borderWidth:1.5,
         borderDash:[3,6], pointRadius:0, fill:false, order:1,
@@ -1798,7 +1793,7 @@ function renderLiquidChart(){
         legend:{
           display:!noData,
           labels:{color:'#1b2e1b',boxWidth:16,font:{size:15,weight:'600'},
-            filter:item=>!item.text.includes('標準值')
+            filter:item=>!item.text.includes('理論值')
           }
         },
         tooltip:{callbacks:{label:c=>{
@@ -2348,7 +2343,7 @@ function toggleUnkTrend(){
   const btn = document.getElementById('unkTrendBtn');
   if(btn){
     btn.classList.toggle('active', unkShowTrend);
-    btn.textContent = unkShowTrend ? '📈 隱藏趨勢線' : '📈 顯示趨勢線';
+    btn.textContent = unkShowTrend ? '📈 隱藏作圖線' : '📈 顯示作圖線';
   }
   renderUnkChart();
 }
@@ -2375,12 +2370,12 @@ function renderUnkChart(){
         type:'scatter',
         backgroundColor: UNK_POINT_COLORS[p.idx]+'cc',
         borderColor: UNK_POINT_COLORS[p.idx],
-        pointRadius:12, pointHoverRadius:15,
+        pointRadius:8, pointHoverRadius:11,
         order:2,
       });
     });
 
-    // 趨勢線（自動分群）
+    // 作圖線（自動分群）
     if(unkShowTrend && pts.length >= 2){
       const groups = autoGroupBySlope(pts);
       const maxV = Math.max(...pts.map(p=>p.x))*1.2;
@@ -2393,7 +2388,7 @@ function renderUnkChart(){
         const col = UNK_TREND_COLORS[gi % UNK_TREND_COLORS.length];
         const members = grpIndices.map(i=>'物體 '+UNK_LABELS[pts[i].idx]).join('、');
         datasets.push({
-          label: `群組 ${gi+1}（${members}）D≈${slope.toFixed(3)}`,
+          label: `作圖線 ${gi+1}（${members}）D≈${slope.toFixed(3)}`,
           data:[{x:0,y:0},{x:maxV,y:slope*maxV}],
           type:'line',
           borderColor: col,
@@ -2417,7 +2412,7 @@ function renderUnkChart(){
           display:!noData,
           labels:{
             color:'#1b2e1b',boxWidth:14,font:{size:13,weight:'600'},
-            filter: item=>!item.text.startsWith('群組') || unkShowTrend
+            filter: item=>!item.text.startsWith('作圖線') || unkShowTrend
           }
         },
         tooltip:{callbacks:{label:c=>{
@@ -2451,7 +2446,7 @@ function buildUnkAnswerSection(){
 
   // 種數按鈕 1~5
   const wrap = document.getElementById('unkTypeCountBtns');
-  if(wrap) wrap.innerHTML = [1,2,3,4,5].map(n=>
+  if(wrap) wrap.innerHTML = [3,4,5].map(n=>
     `<button class="type-count-btn" onclick="selectUnkTypeCount(${n},this)">${n} 種</button>`
   ).join('');
   unkAnswerTypeCount = null;
