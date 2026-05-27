@@ -1257,9 +1257,16 @@ function updateSolidCylinderDisplay(){
   document.getElementById('cylinderWater').style.height = pct+'%';
   animateNumber('cylinderVal', parseFloat(document.getElementById('cylinderVal').textContent||String(WATER_BASE)), totalVol, 600, 1);
 
+  const cyl = document.getElementById('cylinderZone');
+  // 清除舊的浮體/重物視覺
+  document.querySelectorAll('.solid-float-obj, .solid-sinker-obj').forEach(e=>e.remove());
+
   const obj = document.getElementById('cylinderObj');
   if(solidCylObjects.size===0 && !woodSinkerOnCylinder){ obj.style.display='none'; updateSolidBalanceDisplay(); return; }
+
   const floats = isWood && !woodSinkerOnCylinder && solidCylObjects.size>0;
+
+  // 顯示沉底物體（包含重物）
   if(solidCylObjects.size>0){
     const lastIdx=[...solidCylObjects].at(-1);
     const sp=mat.specimens[lastIdx];
@@ -1267,12 +1274,34 @@ function updateSolidCylinderDisplay(){
     obj.style.display='flex'; obj.style.width=sz+'px'; obj.style.height=sz+'px';
     obj.style.background=mat.color; obj.textContent=mat.icon; obj.style.fontSize=(sz*0.45)+'px';
     if(floats){
-      const wPct=parseFloat(document.getElementById('cylinderWater').style.height||'50');
-      obj.style.bottom='auto'; obj.style.top=(100-wPct-6)+'%';
+      // 漂浮：顯示在水面
+      const wPct=parseFloat(document.getElementById('cylinderWater').style.height||'33.3');
+      obj.style.bottom='auto'; obj.style.top=(100-wPct-8)+'%';
+      obj.style.left='50%'; obj.style.transform='translateX(-50%)';
     } else {
       obj.style.bottom='4px'; obj.style.top='auto';
+      obj.style.left='50%'; obj.style.transform='translateX(-50%)';
     }
-  } else { obj.style.display='none'; }
+  } else {
+    obj.style.display='none';
+  }
+
+  // 重物視覺（木頭實驗）
+  if(isWood && woodSinkerOnCylinder){
+    const sinkerEl = document.createElement('div');
+    sinkerEl.className = 'solid-sinker-obj';
+    sinkerEl.style.cssText = `
+      position:absolute;bottom:${solidCylObjects.size>0?'22px':'4px'};
+      left:50%;transform:translateX(-10px);
+      width:20px;height:20px;
+      background:linear-gradient(135deg,#6b7280,#374151);
+      border-radius:4px;display:flex;align-items:center;justify-content:center;
+      color:#fff;font-size:0.6rem;font-weight:800;z-index:3;
+    `;
+    sinkerEl.textContent = '重';
+    cyl.appendChild(sinkerEl);
+  }
+
   updateSolidBalanceDisplay();
 }
 
@@ -1287,6 +1316,7 @@ function clearSolidCylinder(){
   document.getElementById('cylinderVal').textContent=String(WATER_BASE);
   document.getElementById('cylinderWater').style.height=(WATER_BASE/CYL_MAX_VOL*100)+'%';
   document.getElementById('cylinderObj').style.display='none';
+  document.querySelectorAll('.solid-float-obj, .solid-sinker-obj').forEach(e=>e.remove());
   updateSolidBalanceDisplay();
 }
 function clearInstruments(){
