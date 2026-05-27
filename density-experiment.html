@@ -45,13 +45,13 @@ header p{font-size:1rem;color:#a5d6a7;margin-top:4px;}
 .metal-tab.active{border-color:var(--accent);background:rgba(46,125,50,0.12);color:var(--accent);}
 
 /* Experiment station */
-.station{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px 24px;position:relative;}
+.station{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;position:relative;overflow-x:auto;}
 .station-title{font-size:0.9rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:14px;}
 
 /* Shelf */
 .shelf{background:linear-gradient(180deg,#dcedc8,#c8e6c9);border:1px solid var(--border);border-radius:10px;padding:14px 24px 18px;}
 .shelf-label{font-size:0.85rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:12px;}
-.shelf-items{display:flex;gap:24px;align-items:flex-end;min-height:80px;}
+.shelf-items{display:flex;gap:18px;align-items:flex-end;min-height:90px;}
 
 /* Metal block */
 .metal-block{
@@ -79,23 +79,23 @@ header p{font-size:1rem;color:#a5d6a7;margin-top:4px;}
 /* Balance */
 .balance-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:0;}
 .balance-label{font-size:1rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;align-self:flex-start;font-weight:700;}
-.balance-body{width:100%;background:#f1f8e9;border:2px solid var(--border);border-radius:12px;padding:20px 18px;display:flex;flex-direction:column;align-items:center;gap:12px;position:relative;justify-content:center;}
+.balance-body{width:100%;background:#f1f8e9;border:2px solid var(--border);border-radius:12px;padding:18px 16px;display:flex;flex-direction:column;align-items:center;gap:0;position:relative;justify-content:center;}
 .balance-plate{
-  width:200px;height:18px;background:linear-gradient(180deg,#81c784,#66bb6a);
+  width:180px;height:18px;background:linear-gradient(180deg,#81c784,#66bb6a);
   border-radius:5px;border:1px solid #4caf50;
   display:flex;align-items:center;justify-content:center;
   position:relative;transition:background .3s;
 }
 .balance-plate.highlight{background:linear-gradient(180deg,rgba(76,175,80,0.6),rgba(56,142,60,0.4));border-color:var(--accent);}
-.balance-stand{width:6px;height:44px;background:#4caf50;margin:0 auto;}
-.balance-base{width:150px;height:12px;background:#4caf50;border-radius:5px;}
+.balance-stand{width:6px;height:42px;background:#4caf50;margin:0 auto;margin-top:0;}
+.balance-base{width:140px;height:12px;background:#4caf50;border-radius:5px;margin-top:0;}
 .balance-item-on-plate{position:absolute;top:-38px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;}
 
 /* Cylinder */
 .cylinder-wrap{display:flex;flex-direction:column;align-items:center;gap:0;}
 .cylinder-label{font-size:1rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;align-self:flex-start;font-weight:700;}
 .cylinder-body{
-  width:120px;height:220px;
+  width:130px;height:240px;
   background:rgba(200,230,201,0.2);
   border:3px solid #81c784;
   border-top:none;border-radius:0 0 14px 14px;
@@ -120,7 +120,7 @@ header p{font-size:1rem;color:#a5d6a7;margin-top:4px;}
   padding:4px 0;pointer-events:none;
 }
 .cylinder-scale span{font-size:0.7rem;color:#388e3c;line-height:1;font-weight:600;}
-.cylinder-top{width:134px;height:14px;background:rgba(129,199,132,0.3);border:3px solid #81c784;border-bottom:none;border-radius:5px 5px 0 0;margin:0 auto;}
+.cylinder-top{width:144px;height:14px;background:rgba(129,199,132,0.3);border:3px solid #81c784;border-bottom:none;border-radius:5px 5px 0 0;margin:0 auto;}
 
 
 /* Drop zones */
@@ -250,7 +250,9 @@ header p{font-size:1rem;color:#a5d6a7;margin-top:4px;}
   align-items:flex-end;
   justify-content:center;
   gap:0;
-  flex-wrap:wrap;
+  flex-wrap:nowrap;
+  overflow-x:auto;
+  padding-bottom:4px;
 }
 .shelf-panel{
   display:flex;flex-direction:column;
@@ -258,11 +260,13 @@ header p{font-size:1rem;color:#a5d6a7;margin-top:4px;}
   border:1px solid var(--border);border-radius:12px;
   padding:16px 20px 20px;
   min-width:220px;
+  flex-shrink:0;
 }
 .instrument-panel{
   display:flex;flex-direction:row;
   align-items:flex-end;
-  gap:14px;
+  gap:10px;
+  flex-shrink:0;
 }
 .instrument-visual{
   display:flex;flex-direction:column;
@@ -276,17 +280,18 @@ header p{font-size:1rem;color:#a5d6a7;margin-top:4px;}
 }
 .readout-box{
   background:#f9fbe7;border:2px solid var(--border);border-radius:10px;
-  padding:12px 20px;text-align:center;min-width:160px;
+  padding:12px 18px;text-align:center;min-width:145px;
   box-shadow:0 2px 8px rgba(0,0,0,0.08);
 }
 .readout-box .rval{
-  font-size:2.4rem;font-weight:800;
+  font-size:2.2rem;font-weight:800;
   font-family:'Courier New',monospace;letter-spacing:2px;
 }
-.readout-box .runit{font-size:1rem;color:var(--muted);margin-top:3px;}
+.readout-box .runit{font-size:0.95rem;color:var(--muted);margin-top:3px;}
 .station-divider{
   width:1px;background:var(--border);
-  align-self:stretch;margin:0 20px;
+  align-self:stretch;margin:0 18px;
+  flex-shrink:0;
 }
 </style>
 </head>
@@ -398,9 +403,9 @@ header p{font-size:1rem;color:#a5d6a7;margin-top:4px;}
           <thead>
             <tr>
               <th>待測物</th>
-              <th>M (g)</th>
-              <th>V (cm³)</th>
-              <th>D (g/cm³)</th>
+              <th>質量 M (g)</th>
+              <th>體積 V (cm³)</th>
+              <th>密度 D (g/cm³)</th>
             </tr>
           </thead>
           <tbody id="solidTableBody"></tbody>
@@ -446,10 +451,10 @@ header p{font-size:1rem;color:#a5d6a7;margin-top:4px;}
 
           <!-- Balance with cylinder on top -->
           <div style="display:flex;flex-direction:row;align-items:flex-end;gap:20px;">
-            <div style="display:flex;flex-direction:column;align-items:center;">
-              <div style="font-size:1rem;font-weight:700;color:var(--muted);letter-spacing:1px;margin-bottom:10px;">⚖️ 電子天平 + 量筒</div>
+            <div style="display:flex;flex-direction:column;align-items:flex-start;width:240px;">
+              <div style="font-size:1.05rem;font-weight:700;color:var(--muted);letter-spacing:1px;margin-bottom:10px;padding-left:12px;">⚖️ 電子天平 + 量筒</div>
               <!-- Volume control above cylinder -->
-              <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+              <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;padding-left:36px;">
                 <input id="liqVolInput" type="text" inputmode="decimal"
                   value="0"
                   placeholder="體積"
@@ -458,7 +463,7 @@ header p{font-size:1rem;color:#a5d6a7;margin-top:4px;}
                 <span style="font-size:1rem;color:var(--muted);font-weight:600;">cm³</span>
               </div>
               <!-- Cylinder + Balance all in one SVG -->
-              <svg id="liqCylinderSVG" width="200" height="300" viewBox="-20 0 220 300" xmlns="http://www.w3.org/2000/svg">
+              <svg id="liqCylinderSVG" width="240" height="340" viewBox="-20 0 220 300" xmlns="http://www.w3.org/2000/svg">
                 <defs>
                   <clipPath id="liqClip">
                     <rect x="30" y="10" width="60" height="200"/>
@@ -548,9 +553,9 @@ header p{font-size:1rem;color:#a5d6a7;margin-top:4px;}
           <thead>
             <tr>
               <th>#</th>
-              <th>M (g)</th>
-              <th>V (cm³)</th>
-              <th>D (g/cm³)</th>
+              <th>質量 M (g)</th>
+              <th>體積 V (cm³)</th>
+              <th>密度 D (g/cm³)</th>
             </tr>
           </thead>
           <tbody id="liqTableBody"></tbody>
