@@ -172,9 +172,10 @@ header p{font-size:1rem;color:#a5d6a7;margin-top:4px;}
   border-radius:8px;color:var(--text);font-size:1.1rem;text-align:center;
   outline:none;transition:border-color .2s;
   -moz-appearance:textfield;
+  appearance:textfield;
 }
 .d-input::-webkit-outer-spin-button,
-.d-input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
+.d-input::-webkit-inner-spin-button{-webkit-appearance:none;appearance:none;margin:0;}
 .d-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(46,125,50,0.2);}
 .d-input.ok{border-color:#66bb6a;color:#2e7d32;font-weight:700;}
 
@@ -2254,8 +2255,8 @@ function renderUnkCylObjects(liqD){
   // 先把所有放入的物體按放入順序排列（unkCylObjects 是 Set，依插入順序）
   unkCylObjects.forEach(i=>{
     const d = unkDensities[i]||1.0;
-    if(d>=liqD) floatItems.push(UNK_LABELS[i]); // 先判斷浮沉
-    else sunkItems.push(UNK_LABELS[i]);
+    if(d < liqD) floatItems.push(UNK_LABELS[i]); // 密度小於液體 → 漂浮
+    else sunkItems.push(UNK_LABELS[i]);           // 密度大於等於液體 → 沉底
   });
   // 重物永遠沉底，但放在已放入物體的上方（依放入時機）
   if(unkCylHasSinker){
@@ -2366,12 +2367,17 @@ function renderUnkTable(){
     const rho = hasData ? (+d.m/+d.v).toFixed(4) : null;
     const mOk = d.m!==''?'ok':'';
     const vOk = d.v!==''?'ok':'';
-    return `<tr>
-      <td><span class="sp-name">物體 ${lb}</span></td>
-      <td><input class="d-input ${mOk}" type="text" inputmode="decimal" placeholder="—" value="${d.m}" onchange="onUnkInput(${i},'m',this)"></td>
-      <td><input class="d-input ${vOk}" type="text" inputmode="decimal" placeholder="—" value="${d.v}" onchange="onUnkInput(${i},'v',this)"></td>
-      <td>${hasData&&d.revealed?`<span class="rho-cell">${rho}</span>`:hasData?`<button class="reveal-btn" onclick="revealUnk(${i})">顯示 D</button>`:`<span class="rho-empty">—</span>`}</td>
-    </tr>`;
+    const dCell = hasData && d.revealed
+      ? '<span class="rho-cell">' + rho + '</span>'
+      : hasData
+        ? '<button class="reveal-btn" onclick="revealUnk(' + i + ')">顯示 D</button>'
+        : '<span class="rho-empty">—</span>';
+    return '<tr>' +
+      '<td><span class="sp-name">物體 ' + lb + '</span></td>' +
+      '<td><input class="d-input ' + mOk + '" type="text" inputmode="decimal" placeholder="—" value="' + d.m + '" onchange="onUnkInput(' + i + ',\'m\',this)"></td>' +
+      '<td><input class="d-input ' + vOk + '" type="text" inputmode="decimal" placeholder="—" value="' + d.v + '" onchange="onUnkInput(' + i + ',\'v\',this)"></td>' +
+      '<td>' + dCell + '</td>' +
+      '</tr>';
   }).join('');
 }
 
@@ -2405,40 +2411,28 @@ const UNK_POINT_COLORS = [
   '#e53935','#8e24aa','#1e88e5','#00897b','#f4511e',
   '#6d4c41','#3949ab','#039be5','#43a047','#fdd835'
 ];
-// 趨勢線顏色（與點顏色對應，稍深）
 const UNK_TREND_COLORS = [
   '#b71c1c','#4a148c','#0d47a1','#004d40','#bf360c',
   '#3e2723','#1a237e','#01579b','#1b5e20','#f9a825'
 ];
 
-// ─── 自動分群（依斜率精確聚類，容差 5%）───
 function autoGroupBySlope(pts){
   if(pts.length===0) return [];
-  const TOLERANCE = 0.05; // 斜率差異在 5% 以內視為同一群
-
-  // 計算每個點的密度（斜率）
+  const TOLERANCE = 0.05;
   const slopes = pts.map(p=>p.y/p.x);
-
-  // 貪婪分群：斜率相近（差距 < tolerance * 平均值）的點歸為同一群
-  const groups = []; // [{center, indices:[]}]
+  const groups = [];
   slopes.forEach((s,i)=>{
-    // 找已有群中最近的
-    let matched = -1;
-    let minDiff = Infinity;
+    let matched=-1, minDiff=Infinity;
     groups.forEach((g,gi)=>{
-      const diff = Math.abs(s - g.center) / g.center;
-      if(diff < TOLERANCE && diff < minDiff){
-        minDiff = diff;
-        matched = gi;
-      }
+      const diff=Math.abs(s-g.center)/g.center;
+      if(diff<TOLERANCE&&diff<minDiff){minDiff=diff;matched=gi;}
     });
-    if(matched >= 0){
+    if(matched>=0){
       groups[matched].indices.push(i);
-      // 更新群中心為平均斜率
-      const idxs = groups[matched].indices;
-      groups[matched].center = idxs.reduce((sum,j)=>sum+slopes[j],0)/idxs.length;
+      const idxs=groups[matched].indices;
+      groups[matched].center=idxs.reduce((sum,j)=>sum+slopes[j],0)/idxs.length;
     } else {
-      groups.push({center:s, indices:[i]});
+      groups.push({center:s,indices:[i]});
     }
   });
   return groups.map(g=>g.indices);
@@ -2460,17 +2454,13 @@ function renderUnkChart(){
   const ctx = document.getElementById('unkChart');
   if(!ctx) return;
   if(unkChartInst) unkChartInst.destroy();
-
   const pts = unkEntries.map((d,i)=>{
     if(d.m===''||d.v===''||+d.v<=0) return null;
     return {x:+d.v, y:+d.m, idx:i};
   }).filter(Boolean);
-
   const noData = pts.length===0;
   const datasets = [];
-
   if(!noData){
-    // 散點：每個物體一個顏色
     pts.forEach(p=>{
       datasets.push({
         label: '物體 '+UNK_LABELS[p.idx],
@@ -2478,37 +2468,26 @@ function renderUnkChart(){
         type:'scatter',
         backgroundColor: UNK_POINT_COLORS[p.idx]+'cc',
         borderColor: UNK_POINT_COLORS[p.idx],
-        pointRadius:8, pointHoverRadius:11,
-        order:2,
+        pointRadius:8, pointHoverRadius:11, order:2,
       });
     });
-
-    // 作圖線（自動分群）
     if(unkShowTrend && pts.length >= 2){
       const groups = autoGroupBySlope(pts);
       const maxV = Math.max(...pts.map(p=>p.x))*1.2;
-
       groups.forEach((grpIndices, gi)=>{
         const grpPts = grpIndices.map(i=>pts[i]);
-        // 斜率：過原點的最小二乘
-        const slope = grpPts.reduce((s,p)=>s+p.x*p.y,0) /
-                      grpPts.reduce((s,p)=>s+p.x*p.x,0);
-        const col = UNK_TREND_COLORS[gi % UNK_TREND_COLORS.length];
+        const slope = grpPts.reduce((s,p)=>s+p.x*p.y,0)/grpPts.reduce((s,p)=>s+p.x*p.x,0);
+        const col = UNK_TREND_COLORS[gi%UNK_TREND_COLORS.length];
         const members = grpIndices.map(i=>'物體 '+UNK_LABELS[pts[i].idx]).join('、');
         datasets.push({
-          label: `作圖線 ${gi+1}（${members}）D≈${slope.toFixed(3)}`,
+          label: '作圖線 '+(gi+1)+'（'+members+'）D≈'+slope.toFixed(3),
           data:[{x:0,y:0},{x:maxV,y:slope*maxV}],
-          type:'line',
-          borderColor: col,
-          borderWidth: 2.5,
-          pointRadius: 0,
-          fill: false,
-          order: 1,
+          type:'line', borderColor:col, borderWidth:2.5,
+          pointRadius:0, fill:false, order:1,
         });
       });
     }
   }
-
   unkChartInst = new Chart(ctx.getContext('2d'),{
     type:'scatter',
     data:{ datasets: noData?[]:datasets },
@@ -2518,15 +2497,14 @@ function renderUnkChart(){
       plugins:{
         legend:{
           display:!noData,
-          labels:{
-            color:'#1b2e1b',boxWidth:14,font:{size:13,weight:'600'},
+          labels:{color:'#1b2e1b',boxWidth:14,font:{size:13,weight:'600'},
             filter: item=>!item.text.startsWith('作圖線') || unkShowTrend
           }
         },
         tooltip:{callbacks:{label:c=>{
           if(c.raw&&c.raw.x!==undefined){
             const r=(c.raw.y/c.raw.x).toFixed(4);
-            return `${c.dataset.label}  V=${c.raw.x} cm³, M=${c.raw.y} g, D≈${r}`;
+            return c.dataset.label+'  V='+c.raw.x+' cm³, M='+c.raw.y+' g, D≈'+r;
           }
           return c.dataset.label;
         }},bodyFont:{size:13}}
@@ -2541,24 +2519,20 @@ function renderUnkChart(){
 
 // ─── Answer Section ───
 function buildUnkAnswerSection(){
-  // 浮沉勾選
   ['unkFloatCheckboxes','unkSinkCheckboxes'].forEach(id=>{
     const wrap = document.getElementById(id);
     if(!wrap) return;
     wrap.innerHTML = UNK_LABELS.map(lb=>
-      `<span class="unk-checkbox-item" onclick="toggleUnkCheck(this,'${lb}','${id}')">${lb}</span>`
+      '<span class="unk-checkbox-item" onclick="toggleUnkCheck(this,\''+lb+'\',\''+id+'\')">' + lb + '</span>'
     ).join('');
   });
   unkFloatSelected.clear();
   unkSinkSelected.clear();
-
-  // 種數按鈕 1~5
   const wrap = document.getElementById('unkTypeCountBtns');
   if(wrap) wrap.innerHTML = [3,4,5].map(n=>
-    `<button class="type-count-btn" onclick="selectUnkTypeCount(${n},this)">${n} 種</button>`
+    '<button class="type-count-btn" onclick="selectUnkTypeCount('+n+',this)">'+n+' 種</button>'
   ).join('');
   unkAnswerTypeCount = null;
-
   const res = document.getElementById('unkResult');
   if(res) res.style.display='none';
 }
@@ -2578,58 +2552,38 @@ function selectUnkTypeCount(n, btn){
 function checkUnkAnswers(){
   if(unkMasses.length===0){ showToast('請先完成出題設定'); return; }
   const liqDensity = unkLiquid==='water' ? 1.0 : 0.60;
-
-  // 計算正確答案
   const correctFloat = new Set(UNK_LABELS.filter((_,i)=>unkDensities[i]<liqDensity));
   const correctSink  = new Set(UNK_LABELS.filter((_,i)=>unkDensities[i]>liqDensity));
   const correctTypes = new Set(unkDensities).size;
-
-  // 標記浮的答案
   document.querySelectorAll('#unkFloatCheckboxes .unk-checkbox-item').forEach(el=>{
-    const lb = el.textContent;
-    const sel = unkFloatSelected.has(lb);
-    const cor = correctFloat.has(lb);
-    el.classList.remove('selected','correct','wrong');
-    if(sel&&cor) el.classList.add('correct');
-    else if(sel&&!cor) el.classList.add('wrong');
-    else if(!sel&&cor) el.classList.add('correct'); // 漏選也標出
-  });
-
-  // 標記沉的答案
-  document.querySelectorAll('#unkSinkCheckboxes .unk-checkbox-item').forEach(el=>{
-    const lb = el.textContent;
-    const sel = unkSinkSelected.has(lb);
-    const cor = correctSink.has(lb);
+    const lb=el.textContent; const sel=unkFloatSelected.has(lb); const cor=correctFloat.has(lb);
     el.classList.remove('selected','correct','wrong');
     if(sel&&cor) el.classList.add('correct');
     else if(sel&&!cor) el.classList.add('wrong');
     else if(!sel&&cor) el.classList.add('correct');
   });
-
-  // 結果顯示
-  const floatOk = [...correctFloat].every(lb=>unkFloatSelected.has(lb)) && unkFloatSelected.size===correctFloat.size;
-  const sinkOk  = [...correctSink].every(lb=>unkSinkSelected.has(lb))  && unkSinkSelected.size===correctSink.size;
-  const typeOk  = unkAnswerTypeCount===correctTypes;
-
-  const res = document.getElementById('unkResult');
-  res.style.display = 'block';
-  res.innerHTML = `
-    <div style="background:var(--panel);border-radius:12px;padding:18px 22px;">
-      <div style="font-size:1.1rem;font-weight:700;margin-bottom:12px;">
-        ${(floatOk&&sinkOk&&typeOk)?'🎉 全部正確！':'📋 答案解析'}
-      </div>
-      <div style="display:flex;flex-direction:column;gap:8px;font-size:0.95rem;">
-        <div>漂浮物體：${correctFloat.size>0?[...correctFloat].map(l=>'物體 '+l).join('、'):'（無）'}
-          ${floatOk?'✅':'❌'}</div>
-        <div>沉底物體：${correctSink.size>0?[...correctSink].map(l=>'物體 '+l).join('、'):'（無）'}
-          ${sinkOk?'✅':'❌'}</div>
-        <div>物質種數：共 <b>${correctTypes}</b> 種
-          ${typeOk?'✅':'❌（你回答了 '+(unkAnswerTypeCount||'未選')+'）'}</div>
-        <div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border);font-size:0.88rem;color:var(--muted);">
-          ${unkDensities.map((d,i)=>`物體 ${UNK_LABELS[i]}：${d} g/cm³`).join('　')}
-        </div>
-      </div>
-    </div>`;
+  document.querySelectorAll('#unkSinkCheckboxes .unk-checkbox-item').forEach(el=>{
+    const lb=el.textContent; const sel=unkSinkSelected.has(lb); const cor=correctSink.has(lb);
+    el.classList.remove('selected','correct','wrong');
+    if(sel&&cor) el.classList.add('correct');
+    else if(sel&&!cor) el.classList.add('wrong');
+    else if(!sel&&cor) el.classList.add('correct');
+  });
+  const floatOk=[...correctFloat].every(lb=>unkFloatSelected.has(lb))&&unkFloatSelected.size===correctFloat.size;
+  const sinkOk=[...correctSink].every(lb=>unkSinkSelected.has(lb))&&unkSinkSelected.size===correctSink.size;
+  const typeOk=unkAnswerTypeCount===correctTypes;
+  const res=document.getElementById('unkResult');
+  res.style.display='block';
+  res.innerHTML='<div style="background:var(--panel);border-radius:12px;padding:18px 22px;">'+
+    '<div style="font-size:1.1rem;font-weight:700;margin-bottom:12px;">'+
+    ((floatOk&&sinkOk&&typeOk)?'🎉 全部正確！':'📋 答案解析')+
+    '</div><div style="display:flex;flex-direction:column;gap:8px;font-size:0.95rem;">'+
+    '<div>漂浮物體：'+(correctFloat.size>0?[...correctFloat].map(l=>'物體 '+l).join('、'):'（無）')+' '+(floatOk?'✅':'❌')+'</div>'+
+    '<div>沉底物體：'+(correctSink.size>0?[...correctSink].map(l=>'物體 '+l).join('、'):'（無）')+' '+(sinkOk?'✅':'❌')+'</div>'+
+    '<div>物質種數：共 <b>'+correctTypes+'</b> 種 '+(typeOk?'✅':'❌（你回答了 '+(unkAnswerTypeCount||'未選')+'）')+'</div>'+
+    '<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border);font-size:0.88rem;color:var(--muted);">'+
+    unkDensities.map((d,i)=>'物體 '+UNK_LABELS[i]+'：'+d+' g/cm³').join('　')+
+    '</div></div></div>';
 }
 
 function resetUnkAnswers(){
